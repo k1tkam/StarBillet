@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StarBillet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="img/logoblanco.png">
+
+</head>
+
+<body>
+    <header>
+        <nav role="navigation" aria-label="Main navigation">
+            <div class="logo-section">
+                <div class="logo-wrapper">
+                    <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
+                    <div class="gif-wrapper">
+                        <img id="gif-logo" src="img/giflogos.gif" alt="Animación del logo" class="gif-logo" />
+                        <img id="static-logo" src="img/Logotipo3.png" alt="Logotipo final" class="gif-logo static-logo"
+                            style="display: none;" />
+                    </div>
+                </div>
+            </div>
+            <div class="nav-links" role="menu">
+                <a href="#events" role="menuitem" tabindex="0">Ver eventos</a>
+                <a href="#contact" role="menuitem" tabindex="0">Contáctanos</a>
+                <a href="#inicio" role="menuitem" tabindex="0">Iniciar sesión</a>
+            </div>
+        </nav>
+    </header>
+
+    <script>
+        const gif = document.getElementById("gif-logo");
+        const staticLogo = document.getElementById("static-logo");
+
+        // Cambiar después de duración total del gif (ejemplo: 3 segundos por ciclo x 2)
+        const gifDurationSeconds = 2; // cambia esto según la duración de UNA reproducción
+        const timesToPlay = 2;
+
+        setTimeout(() => {
+            gif.style.display = "none";
+            staticLogo.style.display = "block";
+        }, gifDurationSeconds * timesToPlay * 1000); // Tiempo en milisegundos
+    </script>
+
+
+    <main>
+        <section class="hero">
+            <h1>Compra tus boletos para los mejores eventos</h1>
+            <p>Fácil, rápido y seguro. Explora los eventos disponibles y asegura tu lugar hoy mismo.</p>
+            <button class="btn-primary"><a href="#events">Comprar boletos</a></button>
+        </section>
+
+        <section id="events" class="container">
+            <h2>Eventos Destacados</h2>
+            <div class="events">
+                <article class="card">
+                    <img src="https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=600&q=80"
+                        alt="Concierto de Rock" />
+                    <div class="card-content">
+                        <h3>Concierto de Rock</h3>
+                        <div class="date-location">15 Octubre 2025 - Auditorio Nacional</div>
+                        <button class="btn-secondary">Comprar ahora</button>
+                    </div>
+                </article>
+                <article class="card">
+                    <img src="https://images.unsplash.com/photo-1464375117522-1311a736c58d?auto=format&fit=crop&w=600&q=80"
+                        alt="Festival de Jazz" />
+                    <div class="card-content">
+                        <h3>Festival de Jazz</h3>
+                        <div class="date-location">22 Noviembre 2025 - Parque Central</div>
+                        <button class="btn-secondary">Comprar ahora</button>
+                    </div>
+                </article>
+                <article class="card">
+                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80"
+                        alt="Obra de Teatro" />
+                    <div class="card-content">
+                        <h3>Obra de Teatro</h3>
+                        <div class="date-location">5 Diciembre 2025 - Teatro de la Ciudad</div>
+                        <button class="btn-secondary">Comprar ahora</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="features" class="container">
+            <h2>Por qué comprar con nosotros</h2>
+            <div class="features">
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3>Compra segura</h3>
+                    <p>Protegemos tu información para que compres con total tranquilidad.</p>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7M16 3v4M8 3v4m0 0h8" />
+                    </svg>
+                    <h3>Variedad de eventos</h3>
+                    <p>Desde música hasta teatro, cubrimos todos tus gustos y preferencias.</p>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-9v6a9 9 0 11-18 0V7a3 3 0 013-3h12a3 3 0 013 3z" />
+                    </svg>
+                    <h3>Compra rápida</h3>
+                    <p>Un proceso sin complicaciones para que no pierdas tiempo.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="container">
+            <h2>Contacto</h2>
+            <p>¿Tienes dudas o quieres más información? Escríbenos y te responderemos a la brevedad.</p>
+            <address style="font-style: normal; color: var(--color-text-muted);">
+                Email: <a href="mailto:contacto@starbillet.com">contacto@starbillet.com</a><br />
+                Teléfono: <a href="tel:+521234567890">+57 123 456 7890</a>
+            </address>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2025 StarBillet. Todos los derechos reservados.
+    </footer>
+</body>
+
+</html>

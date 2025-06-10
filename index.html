@@ -38,7 +38,7 @@
         const staticLogo = document.getElementById("static-logo");
 
         // Cambiar después de duración total del gif (ejemplo: 3 segundos por ciclo x 2)
-        const gifDurationSeconds = 2; // tiempo de duración del gif en segundos
+        const gifDurationSeconds = 2; // cambia esto según la duración de UNA reproducción
         const timesToPlay = 2;
 
         setTimeout(() => {
@@ -50,17 +50,28 @@
 
     <main>
         <section class="hero">
-            <h1>Compra tus boletos para los mejores eventos</h1>
-            <p>Fácil, rápido y seguro. Explora los eventos disponibles y asegura tu lugar hoy mismo.</p>
-            <button class="btn-primary"><a href="#events">Comprar boletos</a></button>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Compra tus boletos para los mejores eventos</h1>
+                    <p>Fácil, rápido y seguro. Explora los eventos disponibles y asegura tu lugar hoy mismo.</p>
+                    <button class="btn-primary"><a href="#events">Comprar boletos</a></button>
+                </div>
+                <div class="hero-video">
+                        <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
+                            <source src="vid/starbillet.mp4" type="video/mp4">
+                            Tu navegador no soporta el video HTML5.
+                        </video>
+                </div>
+            </div>
         </section>
+
+
 
         <section id="events" class="container">
             <h2>Eventos Destacados</h2>
             <div class="events">
                 <article class="card">
-                    <img src="https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=600&q=80"
-                        alt="Concierto de Rock" />
+                    <img src="" alt="Concierto de Rock" />
                     <div class="card-content">
                         <h3>Concierto de Rock</h3>
                         <div class="date-location">15 Octubre 2025 - Auditorio Nacional</div>
@@ -68,8 +79,7 @@
                     </div>
                 </article>
                 <article class="card">
-                    <img src="https://images.unsplash.com/photo-1464375117522-1311a736c58d?auto=format&fit=crop&w=600&q=80"
-                        alt="Festival de Jazz" />
+                    <img src="" alt="Festival de Jazz" />
                     <div class="card-content">
                         <h3>Festival de Jazz</h3>
                         <div class="date-location">22 Noviembre 2025 - Parque Central</div>
@@ -77,8 +87,7 @@
                     </div>
                 </article>
                 <article class="card">
-                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80"
-                        alt="Obra de Teatro" />
+                    <img src="" alt="Obra de Teatro" />
                     <div class="card-content">
                         <h3>Obra de Teatro</h3>
                         <div class="date-location">5 Diciembre 2025 - Teatro de la Ciudad</div>

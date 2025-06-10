@@ -112,11 +112,11 @@ nav {
 .hero-text {
     flex: 1 1 400px;
     text-align: left;
-    padding: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: -4rem;
+    margin-top: -3rem;
+    margin-left: -2rem;
 }
 
 
@@ -126,12 +126,12 @@ nav {
     justify-content: center;
     align-items: center;
     padding: 1rem;
-    margin-right: -7rem;
+    margin-right: -9rem;
 }
 
 .hero-video video {
     width: 100%;
-    max-width: 60%;
+    max-width: 65%;
     height: auto;
     display: block;
     border-radius: 12px;

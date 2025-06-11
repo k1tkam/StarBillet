@@ -422,3 +422,104 @@ footer {
     height: 40px;
   }
 }
+
+/* DISEÑO DEDICADO A "CONTACTO.PHP" */
+
+/* Sección principal dividida en dos columnas */
+.two-column-section {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 80vh;
+    padding: 2rem;
+    gap: 2rem;
+    background-color: #f9f9f9;
+}
+
+.two-column-section label{
+  font-size: 0.8rem;
+  font-family: 'Moderniz';
+  color: #000000;
+}
+
+.left-panel,
+.right-panel {
+    flex: 1 1 45%;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Formulario del organizador */
+.organizer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.organizer-form label {
+    font-weight: 0.6rem;
+    margin-bottom: -0.5rem;
+}
+
+.organizer-form input {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+/* Botón personalizado para esta sección */
+.btnprimarycontacto {
+    font-family: 'Moderniz';
+    font-size: 0.8rem;
+    background-color: var(--color-accent);
+    color: #fff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color var(--transition), transform var(--transition), color var(--transition);
+}
+
+.btnprimarycontacto:hover {
+    background-color: var(--color-accent-hover);
+    color: #000; /* Letra negra al hacer hover */
+    transform: scale(1.05);
+}
+
+.disclaimer{
+  margin-top: -1.2rem;
+  margin-bottom: 2rem;
+}
+
+/* Sección debajo del formulario para redirigir a iniciar sesión */
+.login-redirect {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.login-link {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsivo para celu */
+@media (max-width: 768px) {
+    .two-column-section {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .left-panel,
+    .right-panel {
+        flex: 1 1 100%;
+    }
+}

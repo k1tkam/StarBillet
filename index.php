@@ -23,6 +23,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <header>
         <nav role="navigation" aria-label="Main navigation">
             <div class="logo-section">
+                <a href="index.php"><div class="logo-section">
                 <div class="logo-wrapper">
                     <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
                     <div class="gif-wrapper">
@@ -31,10 +32,11 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                             style="display: none;" />
                     </div>
                 </div>
+            </div></a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
                 <a href="#events" role="menuitem" tabindex="0">Eventos</a>
-                <a href="#contact" role="menuitem" tabindex="0">Contactanos</a>
+                <a href="contacto.php" role="menuitem" tabindex="0">Contactanos</a>
                 <?php if ($is_logged_in): ?>
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">
                         Hola, <?php echo htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]); ?>

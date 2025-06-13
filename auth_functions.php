@@ -39,18 +39,19 @@ function loginUser($email, $password)
     try {
         $pdo = getDBConnection();
 
-        // Buscar el usuario por email
-        $stmt = $pdo->prepare("SELECT id, name, email, password FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, name, email, password, role FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        $user = $stmt->fetch();
-
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user && password_verify($password, $user['password'])) {
-            // Iniciar sesión
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_role'] = $user['role'];
 
-            return ['success' => true, 'message' => 'Sesión iniciada correctamente'];
+            return [
+                'success' => true,
+                'user' => $user
+            ];
         } else {
             return ['success' => false, 'message' => 'Credenciales incorrectas'];
         }
@@ -59,6 +60,7 @@ function loginUser($email, $password)
         return ['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()];
     }
 }
+
 
 // Función para obtener información del usuario logueado
 function getCurrentUser()

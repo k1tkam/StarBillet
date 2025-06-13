@@ -2,11 +2,11 @@
 session_start();
 require_once 'auth_functions.php';
 
-// Si ya está logueado como organizador, redirigir
+/*// Si ya está logueado como organizador, redirigir
 if (isOrganizerLoggedIn()) {
     header('Location: organizer_dashboard.php');
     exit();
-}
+}*/
 
 $error = '';
 
@@ -31,11 +31,13 @@ if ($_POST) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Iniciar Sesión (Organizador) - StarBillet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="img/logoblanco.png">
     <style>
@@ -198,9 +200,11 @@ if ($_POST) {
                 justify-content: center;
             }
         }
+
         <?php include 'auth_styles.css'; ?>
     </style>
 </head>
+
 <body>
     <img src="img/logo.png" alt="Fondo animado" class="background-gif" />
     <a href="index.php" class="back-home">
@@ -243,4 +247,5 @@ if ($_POST) {
         </div>
     </div>
 </body>
+
 </html>

@@ -23,16 +23,18 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <header>
         <nav role="navigation" aria-label="Main navigation">
             <div class="logo-section">
-                <a href="index.php"><div class="logo-section">
-                <div class="logo-wrapper">
-                    <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
-                    <div class="gif-wrapper">
-                        <img id="gif-logo" src="img/giflogos.gif" alt="Animación del logo" class="gif-logo" />
-                        <img id="static-logo" src="img/Logotipo3.png" alt="Logotipo final" class="gif-logo static-logo"
-                            style="display: none;" />
+                <a href="index.php">
+                    <div class="logo-section">
+                        <div class="logo-wrapper">
+                            <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
+                            <div class="gif-wrapper">
+                                <img id="gif-logo" src="img/giflogos.gif" alt="Animación del logo" class="gif-logo" />
+                                <img id="static-logo" src="img/Logotipo3.png" alt="Logotipo final"
+                                    class="gif-logo static-logo" style="display: none;" />
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div></a>
+                </a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
                 <a href="#events" role="menuitem" tabindex="0">Eventos</a>

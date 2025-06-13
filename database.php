@@ -25,20 +25,23 @@ function getDBConnection()
     }
 }
 
-// Script SQL para crear las tablas necesarias
+
 /*
 CREATE DATABASE IF NOT EXISTS starbillet;
 USE starbillet;
 
+-- Tabla de usuarios con campo 'role'
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'user', -- 'user' o 'admin'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Tabla de eventos
 CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
@@ -53,6 +56,7 @@ CREATE TABLE IF NOT EXISTS events (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Tabla de tickets
 CREATE TABLE IF NOT EXISTS tickets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -71,7 +75,11 @@ INSERT IGNORE INTO events (name, description, date, time, venue, price, availabl
 ('Concierto de Rock', 'Una noche épica de rock con las mejores bandas locales', '2025-10-15', '20:00:00', 'Auditorio Nacional', 50000.00, 500),
 ('Festival de Jazz', 'Disfruta del mejor jazz en vivo en un ambiente único', '2025-11-22', '18:00:00', 'Parque Central', 35000.00, 300),
 ('Obra de Teatro', 'Una producción teatral que no te puedes perder', '2025-12-05', '19:30:00', 'Teatro de la Ciudad', 25000.00, 150);
-INSERT INTO usuarios (email, password) VALUES ('admin@starbillet.com', '123456');
+
+-- Insertar usuario administrador (la contraseña debe ser hasheada en producción)
+INSERT IGNORE INTO users (name, email, password, role) 
+VALUES ('Administrador', 'admin@starbillet.com', '$2y$10$8e9Uo1avSYsJtEBboETIKe0c7xfP8krA6PbkhVXaUgG4PbHxlFZ7G', 'admin');
 */
+
 
 ?>

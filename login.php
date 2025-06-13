@@ -1,6 +1,27 @@
 <?php
 session_start();
 require_once 'auth_functions.php';
+// Protección contra fuerza bruta
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+    $_SESSION['last_attempt_time'] = time();
+}
+
+$bloqueado = false;
+$tiempo_bloqueo = 60; // segundos
+$max_intentos = 5;
+
+if ($_SESSION['login_attempts'] >= $max_intentos) {
+    $elapsed = time() - $_SESSION['last_attempt_time'];
+    if ($elapsed < $tiempo_bloqueo) {
+        $bloqueado = true;
+        $error = 'Demasiados intentos fallidos. Intenta nuevamente en ' . ($tiempo_bloqueo - $elapsed) . ' segundos.';
+    } else {
+        // Reinicia el contador después del bloqueo
+        $_SESSION['login_attempts'] = 0;
+    }
+}
+
 
 // Si ya está logueado, redirigir
 if (isLoggedIn()) {
@@ -20,14 +41,28 @@ if ($_POST) {
         $error = 'Email no válido';
     } else {
         $result = loginUser($email, $password);
-        if ($result['success']) {
-            header('Location: index.php');
-            exit();
-        } else {
-            $error = $result['message'] ?: 'Usuario o contraseña incorrectos.';
+
+        if (!$bloqueado) {
+            if ($result['success']) {
+                $_SESSION['login_attempts'] = 0; // reinicia intentos
+                $_SESSION['user'] = $result['user']; // guarda los datos del usuario en sesión
+
+                // Redirigir según rol
+                if ($result['user']['role'] === 'admin') {
+                    header('Location: admin-dashboard.php');
+                } else {
+                    header('Location: index.php');
+                }
+                exit();
+            } else {
+                $_SESSION['login_attempts']++;
+                $_SESSION['last_attempt_time'] = time();
+                $error = $result['message'] ?? 'Usuario o contraseña incorrectos.';
+            }
         }
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

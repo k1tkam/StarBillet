@@ -35,7 +35,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div></a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
-                <a href="#events" role="menuitem" tabindex="0">Eventos</a>
+                <a href="events.php" role="menuitem" tabindex="0">Eventos</a>
                 <a href="contacto.php" role="menuitem" tabindex="0">Contactanos</a>
                 <?php if ($is_logged_in): ?>
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">

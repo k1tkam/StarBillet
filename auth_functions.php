@@ -190,4 +190,74 @@ function getUserTickets($userId)
         return [];
     }
 }
+
+function isOrganizerLoggedIn() {
+    return isset($_SESSION['organizer_id']);
+}
+
+
+//  Obtiene la información del organizador actualmente autenticado
+//  Retorna un array con los datos del organizador, o null si no ha iniciado sesión
+ 
+function getOrganizerData() {
+    if (!isOrganizerLoggedIn()) return null;
+
+    global $db;
+    $stmt = $db->prepare("SELECT id, nombre, email FROM organizers WHERE id = ?");
+    $stmt->execute([$_SESSION['organizer_id']]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
+ // Inicia sesión de un organizador
+ 
+function loginOrganizer($email, $password) {
+    global $db;
+
+    $stmt = $db->prepare("SELECT id, password FROM organizers WHERE email = ?");
+    $stmt->execute([$email]);
+    $organizer = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($organizer && password_verify($password, $organizer['password'])) {
+        $_SESSION['organizer_id'] = $organizer['id'];
+        return ['success' => true];
+    }
+
+    return ['success' => false, 'message' => 'Email o contraseña incorrectos.'];
+}
+
+
+ // Registra un nuevo organizador
+ 
+function registerOrganizer($nombre, $email, $password) {
+    global $db;
+
+    // Verificar si el email ya está registrado
+    $stmt = $db->prepare("SELECT id FROM organizers WHERE email = ?");
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        return ['success' => false, 'message' => 'El email ya está registrado'];
+    }
+
+    // Encriptar la contraseña
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insertar el organizador
+    $stmt = $db->prepare("INSERT INTO organizers (nombre, email, password) VALUES (?, ?, ?)");
+    $success = $stmt->execute([$nombre, $email, $hashedPassword]);
+
+    if ($success) {
+        return ['success' => true];
+    } else {
+        return ['success' => false, 'message' => 'Error al registrar el organizador'];
+    }
+}
+
+
+//Cierra la sesión del organizador
+
+function logoutOrganizer() {
+    unset($_SESSION['organizer_id']);
+}
+
 ?>

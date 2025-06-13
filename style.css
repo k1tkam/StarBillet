@@ -29,6 +29,7 @@
   --font-body: "Inter", sans-serif;
   --transition: 0.2s ease;
   --max-content-width: 1200px;
+  --max-content-width2: 1600px;
 }
 
 *,
@@ -216,6 +217,7 @@ nav {
 
 .btn-primary:hover {
   background-color: var(--color-accent-hover);
+  color: #000;
   transform: scale(1.05);
 }
 
@@ -429,9 +431,9 @@ footer {
 .two-column-section {
     display: flex;
     flex-wrap: wrap;
-    min-height: 80vh;
     padding: 2rem;
     gap: 2rem;
+    overflow: hidden;
     background-color: #f9f9f9;
 }
 
@@ -448,6 +450,24 @@ footer {
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.video-contacto {
+  flex: 1 1 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin-right: -9rem;
+}
+
+.video-contacto video {
+  width: 100%;
+  max-width: 25%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Formulario del organizador */
@@ -522,4 +542,239 @@ footer {
     .right-panel {
         flex: 1 1 100%;
     }
+}
+
+
+
+/* SECCIÓN DE EVENTOS*/
+
+.busqueda-eventos {
+  background-color: var(--color-white);
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.search-bar {
+padding: 15px 20px;
+font-size: 1.1rem;
+border-radius: 15px;
+background-color: black;
+color: white;
+display: flex;
+align-items: center;
+gap: 15px;
+width: 100%;
+max-width: 600px;
+}
+
+.search-bar i {
+font-size: 1.3rem;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  width: 100%;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.2rem;
+}
+
+.filters button {
+  font-family: 'Moderniz';
+padding: 15px 20px;
+font-size: 1rem;
+border-radius: 12px;
+background-color: black;
+color: white;
+border: 2px solid white;
+cursor: pointer;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: background 0.3s, transform 0.2s;
+}
+
+.filters button:hover {
+background-color: #222;
+transform: scale(1.05);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.modal-content {
+background: #111;
+padding: 30px;
+border-radius: 20px;
+margin-top: 20px; 
+animation: zoomIn 0.3s ease-in-out;
+color: white;
+width: 100%;
+max-width: 400px;
+}   
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  float: right;
+  cursor: pointer;
+  margin-top: -20px;
+  margin-right: -10px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  background: white;
+}
+
+input[type=range] {
+  accent-color: black;
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes zoomIn {
+  from {
+      transform: scale(0.6);
+      opacity: 0;
+  }
+  to {
+      transform: scale(1);
+      opacity: 1;
+  }
+}
+
+#cityList li {
+padding: 10px;
+border-bottom: 1px solid #444;
+cursor: pointer;
+transition: background 0.2s;
+color: white;
+}
+
+#cityList li:hover {
+  background-color: #222;
+}
+
+/* Botón de lupa inicial */
+.search-trigger {
+position: fixed;
+top: 20px;
+left: 20px;
+z-index: 1000;
+font-size: 20px;
+cursor: pointer;
+background: white;
+padding: 10px;
+border-radius: 50%;
+color: black;
+}
+
+/* Fondo oscuro */
+.search-overlay {
+display: flex;
+position: fixed;
+inset: 0;
+background: rgba(0, 0, 0, 0.8);
+z-index: 999;
+align-items: flex-start; 
+justify-content: center;
+padding-top: 80px;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s ease;
+}
+
+/* Caja del input */
+.search-modal {
+background: white;
+display: flex;
+align-items: center;
+padding: 15px 20px;
+border-radius: 30px;
+width: 90%;
+max-width: 600px;
+transform: scale(0.5) translateY(200px); 
+opacity: 0;
+transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+/* Input de texto */
+.search-modal input {
+flex: 1;
+font-size: 18px;
+border: none;
+outline: none;
+padding: 10px;
+}
+
+/* Ícono "X" */
+.search-modal i {
+font-size: 20px;
+cursor: pointer;
+color: #555;
+margin-left: 10px;
+}
+
+/* Clase activa (cuando se abre) */
+.search-overlay.active {
+opacity: 1;
+pointer-events: all;
+}
+
+.search-overlay.active .search-modal {
+transform: scale(1) translateY(0);
+opacity: 1;
+}
+
+.card-content-event {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-content-event h3 {
+  font-family: "Moderniz";
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem;
+}
+
+.container-event{
+  width: 100%;
+  max-width: var(--max-content-width2);
+  margin: auto;
+  padding: -0.5rem 2.2rem;
 }

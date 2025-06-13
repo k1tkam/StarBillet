@@ -87,7 +87,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 
             <div class="login-redirect">
                 <p>¿Ya tienes una cuenta?</p>
-                <a href="#"><button class="btnprimarycontacto">Inicia sesion aqui</button></a>
+                <a href="loginOrg.php"><button class="btnprimarycontacto">Inicia sesion aqui</button></a>
             </div>
         </div>
 

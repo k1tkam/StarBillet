@@ -78,7 +78,7 @@ INSERT IGNORE INTO events (name, description, date, time, venue, price, availabl
 
 -- Insertar usuario administrador (la contraseña debe ser hasheada en producción)
 INSERT IGNORE INTO users (name, email, password, role) 
-VALUES ('Administrador', 'admin@starbillet.com', '$2y$10$8e9Uo1avSYsJtEBboETIKe0c7xfP8krA6PbkhVXaUgG4PbHxlFZ7G', 'admin');
+VALUES ('Administrador', 'admin@starbillet.com', '$2y$10$OuP936B6NQkZ82MzXVvX3emDqmFXqlxuR78L16JpUgKMC7l4bu0z2', 'admin');
 */
 
 

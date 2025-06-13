@@ -36,7 +36,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div></a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
-                <a href="#events" role="menuitem" tabindex="0">Eventos</a>
+                <a href="events.php" role="menuitem" tabindex="0">Eventos</a>
                 <a href="contacto.php" role="menuitem" tabindex="0">Contactanos</a>
                 <?php if ($is_logged_in): ?>
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">
@@ -99,8 +99,20 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                 <li><strong>WhatsApp:</strong> +57 300 123 4567</li>
             </ul>
             <p>Envíanos tu hoja de vida y únete a nuestro equipo.</p>
+
+            <div class="video-contacto">
+                    <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
+                        <source src="vid/starbillet.mp4" type="video/mp4">
+                        Tu navegador no soporta el video HTML5.
+                    </video>
+            </div>
+
         </div>
     </main>
+
+    <footer>
+        &copy; 2025 StarBillet. Todos los derechos reservados.
+    </footer>
 
 </body>
 

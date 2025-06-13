@@ -1,9 +1,19 @@
 <?php
+require_once 'database.php';
 session_start();
 
-// Verificar si el usuario está logueado
+// Verifica si el usuario ha iniciado sesión
 $is_logged_in = isset($_SESSION['user_id']);
 $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+
+// Obtener todos los eventos de la base de datos
+try {
+    $pdo = getDBConnection();
+    $stmt = $pdo->query("SELECT * FROM events ORDER BY date ASC");
+    $events = $stmt->fetchAll();
+} catch (PDOException $e) {
+    die("Error al obtener los eventos: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -231,6 +241,14 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     opacity: 1;
     }
 
+    .card {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    }   
+
+
     </style>
 
 </head>
@@ -430,48 +448,39 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     </section>
 
     <section id="events" class="container">
-            <div class="events">
-                <article class="card">
-                    <img src="" alt="Concierto de Rock" />
-                    <div class="card-content">
-                        <h3>Concierto de Rock</h3>
-                        <div class="date-location">15 Octubre 2025 - Auditorio Nacional</div>
+    <div class="events">
+        <?php if (count($events) > 0): ?>
+            <?php foreach ($events as $event): ?>
+                <article class="card" style="min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <img src="<?= htmlspecialchars($event['image_url']) ?>" alt="<?= htmlspecialchars($event['name']) ?>" style="width: 100%; border-radius: 6px;" />
+                    <div class="card-content" style="margin-top: 0.75rem;">
+                        <h3 style="font-size: 1.4rem; font-weight: bold; margin-bottom: 0.5rem;">
+                            <?= htmlspecialchars($event['name']) ?>
+                        </h3>
+                        
+                        <div class="date-location" style="font-size: 1.1rem; font-weight: 500; margin-bottom: 0.3rem;">
+                            <?= date('D, d M', strtotime($event['date'])) ?> - <?= htmlspecialchars($event['venue']) ?>
+                        </div>
+
+                        <div class="price" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.75rem; text-align: center;">
+                            <?= $event['price'] == 0 ? 'Desde Gratis' : 'Precio: $' . number_format($event['price'], 2) ?>
+                        </div>
+
                         <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
+                            <button class="btn-secondary" style="padding: 0.6rem 1rem; font-size: 1rem; font-weight: 500; background-color: #222; color: #fff; border: none; border-radius: 5px;">
+                                Comprar ahora
+                            </button>
                         <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
+                            <button class="btn-secondary" onclick="window.location.href='login.php'" style="padding: 0.6rem 1rem; font-size: 0.8rem; font-weight: 300; display: block; margin: 0 auto;">Inicia sesion para comprar</button>
                         <?php endif; ?>
                     </div>
                 </article>
-                <article class="card">
-                    <img src="" alt="Festival de Jazz" />
-                    <div class="card-content">
-                        <h3>Festival de Jazz</h3>
-                        <div class="date-location">22 Noviembre 2025 - Parque Central</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="" alt="Obra de Teatro" />
-                    <div class="card-content">
-                        <h3>Obra de Teatro</h3>
-                        <div class="date-location">5 Diciembre 2025 - Teatro de la Ciudad</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-            </div>
-        </section>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No se encontraron eventos con los filtros aplicados.</p>
+        <?php endif; ?>
+    </div>
+    </section>
 
 
     <section id="contact" class="container">

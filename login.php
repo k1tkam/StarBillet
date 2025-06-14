@@ -1,7 +1,10 @@
 <?php
-session_start();
-require_once 'auth_functions.php';
-// Protección contra fuerza bruta
+session_start(); // Inicia la sesión al principio
+
+require_once 'auth_functions.php'; // Asegúrate de que loginUser() y isLoggedIn() estén aquí
+
+// --- Lógica de Protección contra Fuerza Bruta ---
+// Inicializa o actualiza el contador de intentos y el tiempo del último intento
 if (!isset($_SESSION['login_attempts'])) {
     $_SESSION['login_attempts'] = 0;
     $_SESSION['last_attempt_time'] = time();
@@ -11,58 +14,91 @@ $bloqueado = false;
 $tiempo_bloqueo = 60; // segundos
 $max_intentos = 5;
 
+// Verifica si el usuario está actualmente bloqueado
 if ($_SESSION['login_attempts'] >= $max_intentos) {
     $elapsed = time() - $_SESSION['last_attempt_time'];
     if ($elapsed < $tiempo_bloqueo) {
         $bloqueado = true;
-        $error = 'Demasiados intentos fallidos. Intenta nuevamente en ' . ($tiempo_bloqueo - $elapsed) . ' segundos.';
+        // Calcula el tiempo restante para mostrarlo al usuario
+        $tiempo_restante = $tiempo_bloqueo - $elapsed;
+        $error = 'Demasiados intentos fallidos. Por favor, espera ' . $tiempo_restante . ' segundos antes de intentar de nuevo.';
     } else {
-        // Reinicia el contador después del bloqueo
+        // El tiempo de bloqueo ha pasado, reinicia el contador
         $_SESSION['login_attempts'] = 0;
+        $_SESSION['last_attempt_time'] = time(); // Reinicia el tiempo también
     }
 }
 
-
-// Si ya está logueado, redirigir
-if (isLoggedIn()) {
-    header('Location: index.php');
+// --- Redirección de Usuarios Ya Logueados ---
+// Esta es la primera verificación real, antes de procesar cualquier POST
+if (isset($_SESSION['user_id'])) {
+    // Si es un usuario regular o admin
+    if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        header('Location: admin-dashboard.php');
+    } else {
+        header('Location: index.php'); // O a dashboard.php si tienes uno para usuarios normales
+    }
+    exit();
+} elseif (isset($_SESSION['org_id'])) {
+    // Si es un organizador
+    header('Location: organizer-dashboard.php'); // Asume que tienes un dashboard para organizadores
     exit();
 }
 
-$error = '';
+$error = ''; // Inicializa la variable de error antes del bloque POST
 
-if ($_POST) {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+// --- Procesamiento del Formulario de Login ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    if (empty($email) || empty($password)) {
-        $error = 'Por favor completa todos los campos';
+    if ($bloqueado) {
+        // Si está bloqueado, no procesa el login, solo muestra el error de bloqueo.
+        // El mensaje de error ya se estableció arriba.
+    } elseif (empty($email) || empty($password)) {
+        $error = 'Por favor completa todos los campos.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Email no válido';
+        $error = 'El formato del email no es válido.';
     } else {
+        // Intenta loguear al usuario
+        // Asegúrate de que loginUser() devuelva un array con 'success', 'message', y 'user'/'organizer' data
         $result = loginUser($email, $password);
 
-        if (!$bloqueado) {
-            if ($result['success']) {
-                $_SESSION['login_attempts'] = 0; // reinicia intentos
-                $_SESSION['user'] = $result['user']; // guarda los datos del usuario en sesión
+        if ($result['success']) {
+            // Reinicia los intentos de login al éxito
+            $_SESSION['login_attempts'] = 0;
+            $_SESSION['last_attempt_time'] = time();
 
-                // Redirigir según rol
+            // Guarda los datos en sesión de forma granular
+            if (isset($result['user'])) { // Esto sería para usuarios normales y administradores
+                $_SESSION['user_id'] = $result['user']['id'];
+                $_SESSION['user_name'] = $result['user']['name'];
+                $_SESSION['user_email'] = $result['user']['email'];
+                $_SESSION['user_role'] = $result['user']['role'];
+
+                // Redirigir según el rol
                 if ($result['user']['role'] === 'admin') {
                     header('Location: admin-dashboard.php');
                 } else {
                     header('Location: index.php');
                 }
-                exit();
-            } else {
-                $_SESSION['login_attempts']++;
-                $_SESSION['last_attempt_time'] = time();
-                $error = $result['message'] ?? 'Usuario o contraseña incorrectos.';
+            } elseif (isset($result['organizer'])) { // Esto sería para organizadores
+                $_SESSION['org_id'] = $result['organizer']['id'];
+                $_SESSION['org_name'] = $result['organizer']['name'];
+                $_SESSION['org_email'] = $result['organizer']['email'];
+                $_SESSION['user_role'] = 'organizer'; // Define explícitamente el rol de organizador
+
+                header('Location: organizer-dashboard.php');
             }
+            exit();
+        } else {
+            // El login falló, incrementa el contador de intentos
+            $_SESSION['login_attempts']++;
+            $_SESSION['last_attempt_time'] = time();
+            $error = $result['message'] ?? 'Credenciales incorrectas.'; // Mensaje de error general para seguridad
         }
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="es">

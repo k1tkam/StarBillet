@@ -9,6 +9,7 @@ $user_first_name = $is_logged_in && isset($_SESSION['user_name']) ? htmlspecialc
 // --- Lógica de Búsqueda y Filtros ---
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 // Establecer el valor por defecto de selected_city a 'Bogota' si no está presente o está vacío
+// Es crucial que 'Bogota' aquí y en la base de datos sea idéntico (case-sensitive si la DB lo es)
 $selected_city = isset($_GET['city']) && !empty($_GET['city']) ? trim($_GET['city']) : 'Bogota';
 $selected_date = isset($_GET['date']) ? trim($_GET['date']) : '';
 $max_price = isset($_GET['price']) ? (int) $_GET['price'] : null;
@@ -22,17 +23,13 @@ if (!empty($search_query)) {
     $params[':search_query'] = '%' . $search_query . '%';
 }
 
-// Filtro por ciudad: Solo aplica el filtro si no es 'Todas las Ciudades' y no es el valor por defecto (Bogota)
-// Es importante que el valor 'Bogota' sea consistente en DB, JS y PHP.
-if (!empty($selected_city) && strtolower($selected_city) !== 'todas las ciudades' && strtolower($selected_city) !== 'bogota') {
+// --- Filtro por Ciudad Mejorado ---
+// Aplicar el filtro de ciudad a menos que 'Todas las Ciudades' esté seleccionado
+if (strtolower($selected_city) !== 'todas las ciudades') {
     $where_clauses[] = "city = :city";
     $params[':city'] = $selected_city;
-} elseif (strtolower($selected_city) === 'bogota' && (empty($search_query) && empty($selected_date) && $max_price === null)) {
-    // Si la ciudad es Bogota y no hay otros filtros, mostrar solo Bogota.
-    // Si hay otros filtros, Bogota se maneja como cualquier otra ciudad en la lógica de 'empty($selected_city)'
-    $where_clauses[] = "city = :city";
-    $params[':city'] = 'Bogota';
 }
+// Fin del Filtro por Ciudad Mejorado
 
 
 // Filtro por fecha (se asume formato DD-MM-YYYY para la base de datos)
@@ -40,7 +37,7 @@ if (!empty($selected_date)) {
     $date_obj = DateTime::createFromFormat('d-m-Y', $selected_date);
     if ($date_obj) {
         $db_date = $date_obj->format('Y-m-d');
-        // Usamos DATE() para comparar solo la parte de la fecha
+        // Usamos DATE() para comparar solo la parte de la fecha, ignorando la hora
         $where_clauses[] = "DATE(date) = :date_exact";
         $params[':date_exact'] = $db_date;
     }

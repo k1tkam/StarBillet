@@ -1,12 +1,20 @@
 <?php
-session_start();
+session_start(); // Inicia la sesión al principio de tu script
+
+// Verifica si el organizador NO ha iniciado sesión.
+// Si no hay un 'org_id' en la sesión, redirige a la página de login de organizadores.
 if (!isset($_SESSION['org_id'])) {
-    header('Location: loginOrg.php');
-    exit();
+    header('Location: loginOrg.php'); // Redirige a la página de inicio de sesión del organizador
+    exit(); // Es crucial usar exit() después de un header() para detener la ejecución del script
 }
 
-$is_org_logged_in = isset($_SESSION['org_id']);
-$org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
+// Si el código llega hasta aquí, significa que el organizador está logueado.
+$is_org_logged_in = true; // Establecemos esta variable como verdadera
+// Obtenemos el email del organizador desde la sesión y lo sanitizamos para mostrarlo de forma segura.
+$org_email = htmlspecialchars($_SESSION['org_email']);
+
+// A partir de aquí, puedes incluir el resto de la lógica PHP y el HTML
+// para la vista del organizador (orgView.php o donde sea que uses este código).
 
 ?>
 
@@ -21,7 +29,7 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
     <link rel="icon" type="image/png" href="img/logoblanco.png">
 
 </head>
-    
+
 <body>
 
     <header>
@@ -73,18 +81,16 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
     </main>
 
     <div class="hero-video-organizer">
-            <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
+        <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
             <source src="vid/organizador.mp4" type="video/mp4">
             Tu navegador no soporta el video HTML5.
         </video>
     </div>
 
     <style>
-
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap");
 
-        h1
-        {
+        h1 {
             font-family: 'Moderniz';
             font-size: 2.5rem;
             color: #000000;
@@ -100,14 +106,14 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
         }
 
         .hero-video-organizer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 1rem;
-        margin: 2rem auto;
-        margin-top: 1rem;
-        max-width: 35rem;
-        width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            margin: 2rem auto;
+            margin-top: 1rem;
+            max-width: 35rem;
+            width: 100%;
         }
 
         .hero-video-organizer video {
@@ -135,4 +141,5 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
     </footer>
 
 </body>
+
 </html>

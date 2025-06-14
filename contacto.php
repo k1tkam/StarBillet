@@ -1,17 +1,24 @@
 <?php
-session_start();
-session_unset();
-session_destroy();
-session_start(); // Reiniciar una sesión vacía para evitar warnings
+session_start(); // Solo necesitas iniciar la sesión
 
-require_once 'auth_functions.php';
+// Ya no destruyas ni reinicies la sesión aquí.
+// Esto permite que el usuario mantenga su sesión si ya estaba logueado.
+
+require_once 'auth_functions.php'; // Asegúrate de que esta ruta sea correcta
 $error = '';
 $success = '';
 
+// Lógica para verificar si el usuario está logueado para mostrar información relevante en el header o navbar
+$is_logged_in = isset($_SESSION['user_id']);
+$user_email = $is_logged_in ? htmlspecialchars($_SESSION['user_email']) : '';
+$user_first_name = $is_logged_in && isset($_SESSION['user_name']) ? htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]) : '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Depuración: Ver los datos recibidos
-    // echo "<pre>"; print_r($_POST); echo "</pre>"; exit();
-    
+    // Aquí tu lógica para procesar el formulario de contacto o registro
+    // Es CRÍTICO asegurarse de que registerOrg() sea para REGISTRAR, no para LOGUEAR
+    // Si este formulario es de CONTACTO, esta lógica de registerOrg() no debería estar aquí.
+    // Asumo que este archivo se usa para REGISTRO de ORGANIZACIONES.
+
     $email = trim($_POST['email'] ?? '');
     $name = trim($_POST['name'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -27,21 +34,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm_password) {
         $error = 'Las contraseñas no coinciden';
     } else {
+        // Asegúrate de que registerOrg() es una función para registrar NUEVAS cuentas,
+        // no para manejar el inicio de sesión.
         $result = registerOrg($email, $name, $password);
         if ($result['success']) {
-            $success = 'Cuenta creada exitosamente.';
+            $success = 'Cuenta creada exitosamente. ¡Ahora puedes iniciar sesión!';
+            // Opcional: Redirigir al login después del registro exitoso
+            // header('Location: login.php?registered=true');
+            // exit();
         } else {
             $error = $result['message'];
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 
-<style>
-    .error-message {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - StarBillet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="img/logoblanco.png">
+    <link rel="stylesheet" href="
+
+<!DOCTYPE html>
+<html lang=" es">
+
+    <style>
+        .error-message {
             background: #fee;
             color: #c53030;
             padding: 0.75rem;
@@ -135,33 +159,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 0.25rem;
             font-family: 'Inter';
         }
-</style>
+    </style>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>StarBillet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" type="image/png" href="img/logoblanco.png">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>StarBillet</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="style.css" />
+        <link rel="icon" type="image/png" href="img/logoblanco.png">
 
-</head>
+    </head>
 
 <body>
     <header>
         <nav role="navigation" aria-label="Main navigation">
             <div class="logo-section">
-                <a href="index.php"><div class="logo-section">
-                <div class="logo-wrapper">
-                    <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
-                    <div class="gif-wrapper">
-                        <img id="gif-logo" src="img/giflogos.gif" alt="Animación del logo" class="gif-logo" />
-                        <img id="static-logo" src="img/Logotipo3.png" alt="Logotipo final" class="gif-logo static-logo"
-                            style="display: none;" />
+                <a href="index.php">
+                    <div class="logo-section">
+                        <div class="logo-wrapper">
+                            <img src="img/logo.png" alt="Logo de StarBillet" class="logo-img" />
+                            <div class="gif-wrapper">
+                                <img id="gif-logo" src="img/giflogos.gif" alt="Animación del logo" class="gif-logo" />
+                                <img id="static-logo" src="img/Logotipo3.png" alt="Logotipo final"
+                                    class="gif-logo static-logo" style="display: none;" />
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div></a>
+                </a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
                 <a href="events.php" role="menuitem" tabindex="0">Eventos</a>
@@ -187,46 +213,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <main class="two-column-section">
         <div class="left-panel">
-    <h2>Registra a tu organización</h2>
-    <p class="disclaimer">¿Eres organizador de eventos? Crea tu cuenta y comienza a publicar tus eventos hoy mismo.</p>
+            <h2>Registra a tu organización</h2>
+            <p class="disclaimer">¿Eres organizador de eventos? Crea tu cuenta y comienza a publicar tus eventos hoy
+                mismo.</p>
 
-    <?php if ($error): ?>
-        <div class="error-message">
-            <?php echo htmlspecialchars($error); ?>
+            <?php if ($error): ?>
+                <div class="error-message">
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($success): ?>
+                <div class="success-message">
+                    <?php echo htmlspecialchars($success); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!$success): ?>
+                <form action="" method="POST" class="organizer-form">
+                    <label for="reg-email">Correo electrónico</label>
+                    <input type="email" id="reg-email" name="email"
+                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
+
+                    <label for="org-name">Nombre de la organización</label>
+                    <input type="text" id="org-name" name="name"
+                        value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
+
+                    <label for="reg-password">Contraseña</label>
+                    <input type="password" id="reg-password" name="password" required>
+
+                    <label for="confirm-password">Confirmar contraseña</label>
+                    <input type="password" id="confirm-password" name="confirm_password" required>
+
+                    <button type="submit" class="btnprimarycontacto">Crear cuenta</button>
+                </form>
+            <?php endif; ?>
+
+            <div class="login-redirect">
+                <p>¿Ya tienes una cuenta?</p>
+                <a href="loginOrg.php"><button class="btnprimarycontacto">Inicia sesión aquí</button></a>
+            </div>
         </div>
-    <?php endif; ?>
-
-    <?php if ($success): ?>
-        <div class="success-message">
-            <?php echo htmlspecialchars($success); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (!$success): ?>
-        <form action="" method="POST" class="organizer-form">
-            <label for="reg-email">Correo electrónico</label>
-            <input type="email" id="reg-email" name="email"
-                value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
-
-            <label for="org-name">Nombre de la organización</label>
-            <input type="text" id="org-name" name="name"
-                value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
-
-            <label for="reg-password">Contraseña</label>
-            <input type="password" id="reg-password" name="password" required>
-
-            <label for="confirm-password">Confirmar contraseña</label>
-            <input type="password" id="confirm-password" name="confirm_password" required>
-
-            <button type="submit" class="btnprimarycontacto">Crear cuenta</button>
-        </form>
-    <?php endif; ?>
-
-    <div class="login-redirect">
-        <p>¿Ya tienes una cuenta?</p>
-        <a href="loginOrg.php"><button class="btnprimarycontacto">Inicia sesión aquí</button></a>
-    </div>
-</div>
 
         <div class="right-panel">
             <h2>¿Quieres trabajar con nosotros?</h2>

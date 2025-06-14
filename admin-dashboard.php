@@ -1,26 +1,48 @@
 <?php
-session_start();
+session_start(); // Inicia la sesión al principio del script
 
-// Incluir funciones necesarias
+// Incluimos el archivo que contiene las funciones de autenticación y posiblemente de base de datos.
+// Asegúrate de que la ruta 'auth_functions.php' sea correcta.
 require_once 'auth_functions.php';
 
-// Verificar que el usuario esté logueado y sea admin
+// --- Verificación de Autenticación y Rol de Administrador ---
+// Este es un paso crítico para proteger tu panel de administración.
+// 1. Comprueba si 'user_id' está configurado en la sesión (indica que hay un usuario logueado).
+// 2. Comprueba si el rol del usuario en la sesión es 'admin'. Usamos el operador de fusión de null (?? 'user')
+//    para asegurarnos de que no haya un error si 'user_role' no está definido por alguna razón,
+//    asumiendo 'user' como valor predeterminado si no se encuentra el rol.
 if (!isset($_SESSION["user_id"]) || ($_SESSION["user_role"] ?? 'user') !== "admin") {
-    // Si no está logueado o no es admin, redirige al index
+    // Si el usuario no está logueado o no tiene el rol de "admin",
+    // lo redirigimos a la página principal (index.php).
     header("Location: index.php");
-    exit();
+    exit(); // Es fundamental usar exit() después de un header() para detener la ejecución del script.
 }
 
-// Variables para el header
-$is_logged_in = isset($_SESSION['user_id']);
-$user_email = $is_logged_in ? $_SESSION['user_email'] : '';
-$user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Obtener solo el primer nombre
+// --- Preparación de Variables para la Vista (Header/Dashboard) ---
+// Si el código llega a este punto, sabemos que el usuario está logueado y es un administrador.
+$is_logged_in = true; // El usuario está logueado.
 
-// Mensajes de feedback (éxito/error) desde la sesión (podrían venir de acciones en otras páginas)
-$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
-$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-unset($_SESSION['message']); // Limpiar el mensaje después de mostrarlo
-unset($_SESSION['error']);   // Limpiar el error después de mostrarlo
+// Obtenemos el email del usuario de la sesión y lo sanitizamos con htmlspecialchars()
+// para prevenir ataques XSS al mostrarlo en el HTML.
+$user_email = htmlspecialchars($_SESSION['user_email'] ?? '');
+
+// Obtenemos el nombre del usuario de la sesión y extraemos solo el primer nombre,
+// también sanitizándolo con htmlspecialchars() para seguridad.
+$user_name = htmlspecialchars(explode(' ', $_SESSION['user_name'] ?? '')[0]);
+
+// --- Manejo de Mensajes Flash (Éxito/Error) ---
+// Estas variables se usan para mostrar notificaciones al usuario,
+// que pudieron haber sido establecidas en una página anterior y guardadas en la sesión.
+$message = htmlspecialchars($_SESSION['message'] ?? ''); // Mensaje de éxito
+$error = htmlspecialchars($_SESSION['error'] ?? '');     // Mensaje de error
+
+// Una vez que los mensajes se han recuperado para ser mostrados,
+// los eliminamos de la sesión para que no se muestren en futuras recargas de página.
+unset($_SESSION['message']);
+unset($_SESSION['error']);
+
+// El resto del código PHP para el dashboard del administrador iría aquí,
+// como la lógica para mostrar usuarios, eventos pendientes de aprobación, etc.
 ?>
 
 <!DOCTYPE html>

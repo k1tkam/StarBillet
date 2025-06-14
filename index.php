@@ -1,30 +1,52 @@
 <?php
 session_start(); // Inicia la sesión al principio de tu script
 
-// Incluye el archivo de funciones donde está getAllApprovedEvents()
-require_once 'auth_functions.php'; // ¡IMPORTANTE! Asegúrate de que esta ruta sea correcta
+// --- Configuración e Inclusiones ---
+// ¡IMPORTANTE! Asegúrate de que estas rutas sean correctas.
+// 'auth_functions.php' debería contener funciones como getAllApprovedEvents().
+// 'database.php' debería contener la función para obtener la conexión a la base de datos (e.g., getDBConnection()).
+require_once 'auth_functions.php';
+require_once 'database.php';
 
-// Variables para el header (asumiendo que manejas el login de usuarios normales y organizadores)
-$is_logged_in = isset($_SESSION['user_id']) || isset($_SESSION['org_id']); // Verifica si hay una sesión de usuario o de organizador
+// --- Gestión de Sesión de Usuario para el Encabezado/Barra de Navegación ---
+$is_logged_in = false; // Por defecto, no está logueado
 $user_name = '';
 $user_role = '';
 
+// Verifica si hay una sesión de usuario normal
 if (isset($_SESSION['user_id'])) {
-    $user_name = $_SESSION['user_name'] ?? '';
-    $user_role = $_SESSION['user_role'] ?? 'user'; // Asume 'user' si no está definido
-} elseif (isset($_SESSION['org_id'])) {
-    $user_name = $_SESSION['org_name'] ?? '';
-    $user_role = 'organizer'; // Asigna un rol específico para organizadores
+    $is_logged_in = true;
+    $user_name = htmlspecialchars($_SESSION['user_name'] ?? '');
+    $user_role = htmlspecialchars($_SESSION['user_role'] ?? 'user'); // Asigna 'user' si el rol no está definido
+}
+// O verifica si hay una sesión de organizador
+elseif (isset($_SESSION['org_id'])) {
+    $is_logged_in = true;
+    $user_name = htmlspecialchars($_SESSION['org_name'] ?? '');
+    $user_role = 'organizer'; // Rol específico para organizadores
 }
 
-// Obtener solo los eventos APROBADOS
-$events = getAllApprovedEvents(); // Usa la función que filtra por 'approved'
+// Extrae el primer nombre para mostrarlo en el encabezado, si está disponible
+$user_first_name = '';
+if (!empty($user_name)) {
+    $user_first_name = htmlspecialchars(explode(' ', $user_name)[0]);
+}
 
-// Manejo de mensajes (ej. después de comprar un ticket o de un registro)
-$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
-$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
-unset($_SESSION['message']); // Limpiar el mensaje después de mostrarlo
-unset($_SESSION['error']);   // Limpiar el error después de mostrarlo
+// --- Recuperación de Eventos ---
+// Obtiene solo los eventos APROBADOS usando tu función dedicada.
+// Esta función (en auth_functions.php) debe encargarse de filtrar por 'status = 'approved''.
+$events = getAllApprovedEvents();
+
+// --- Manejo de Mensajes (Mensajes Flash) ---
+// Obtiene mensajes y errores de la sesión (ej. después de un registro o compra exitosa)
+$message = isset($_SESSION['message']) ? htmlspecialchars($_SESSION['message']) : '';
+$error = isset($_SESSION['error']) ? htmlspecialchars($_SESSION['error']) : '';
+
+// Limpia los mensajes de la sesión para que solo se muestren una vez
+unset($_SESSION['message']);
+unset($_SESSION['error']);
+
+// --- Fin de la Lógica PHP ---
 ?>
 <!DOCTYPE html>
 <html lang="es">

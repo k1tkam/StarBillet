@@ -1,15 +1,59 @@
 <?php
-session_start();
-if (!isset($_SESSION['org_id'])) {
-    header('Location: loginOrg.php');
-    exit();
+session_start(); // Siempre inicia la sesión al principio
+
+// Asegúrate de que 'auth_functions.php' contenga las funciones:
+// - isOrganizerLoggedIn(): Para verificar si ya hay un organizador logueado.
+// - loginOrganizer(): Para manejar la lógica de autenticación del organizador.
+require_once 'auth_functions.php';
+
+// --- Redirección para Organizadores Ya Logueados ---
+// Si un organizador ya tiene una sesión activa, lo redirigimos directamente a su panel.
+if (isOrganizerLoggedIn()) {
+    header('Location: orgView.php'); // Redirige al dashboard del organizador
+    exit(); // Es crucial usar exit() después de un header() para detener la ejecución del script.
 }
 
-$is_org_logged_in = isset($_SESSION['org_id']);
-$org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
+$error = ''; // Inicializa la variable de error para que esté disponible en la vista HTML.
 
+// --- Procesamiento del Formulario de Inicio de Sesión ---
+// Solo procesa el formulario si la solicitud es de tipo POST.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recopila y sanitiza los datos del formulario.
+    // Usamos el operador de fusión de null (??) para evitar errores si la clave no existe.
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    // --- Validaciones de Entrada ---
+    if (empty($email) || empty($password)) {
+        $error = 'Por favor, completa todos los campos.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'El formato del correo electrónico no es válido.';
+    } else {
+        // Llama a la función que maneja la lógica de autenticación del organizador.
+        // Esperamos que esta función devuelva un array con 'success' (bool) y 'message' (string),
+        // y opcionalmente 'organizer' (array de datos del organizador) si el login es exitoso.
+        $result = loginOrganizer($email, $password);
+
+        if ($result['success']) {
+            // --- Establecimiento de Variables de Sesión para el Organizador ---
+            // Si el login fue exitoso, guardamos los datos clave del organizador en la sesión.
+            // Esto es FUNDAMENTAL para que el resto de tu aplicación sepa quién está logueado.
+            $_SESSION['org_id'] = $result['organizer']['id'];
+            $_SESSION['org_name'] = $result['organizer']['name'];
+            $_SESSION['org_email'] = $result['organizer']['email'];
+            $_SESSION['user_role'] = 'organizer'; // Establece un rol explícito para facilitar la lógica de permisos.
+
+            // Redirige al organizador a su vista principal.
+            header('Location: orgView.php');
+            exit();
+        } else {
+            // Si el login falló, muestra el mensaje de error que proviene de loginOrganizer().
+            // Si loginOrganizer() no proporciona un mensaje, usa uno genérico por seguridad.
+            $error = $result['message'] ?? 'Credenciales incorrectas.';
+        }
+    }
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,8 +66,8 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
 </head>
 
 <body>
-    
-<header>
+
+    <header>
         <nav role="navigation" aria-label="Main navigation">
             <div class="logo-section">
                 <a href="index.php">
@@ -50,14 +94,13 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
     </header>
 
     <style>
+        h1 {
+            font-size: 1rem;
+            font-family: 'Moderniz';
+            color: #000;
+        }
 
-    h1{
-        font-size:1rem;
-        font-family: 'Moderniz';
-        color: #000;
-    }
-
-    .error-message {
+        .error-message {
             background: #fee;
             color: #c53030;
             padding: 0.75rem;
@@ -170,7 +213,7 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
             background-color: #fff;
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .event-preview {
@@ -184,41 +227,41 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
         }
 
         .event-form label {
-            align-self: flex-start; /* Alinea el label a la izquierda del form */
+            align-self: flex-start;
+            /* Alinea el label a la izquierda del form */
             font-weight: 500;
             font-size: 0.95rem;
             margin-bottom: -0.5rem;
         }
 
-.event-form input {
-    width: 100%;
-    max-width: fill;
-    padding: 0.6rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 0.95rem;
-}
+        .event-form input {
+            width: 100%;
+            max-width: fill;
+            padding: 0.6rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
 
-.event-form button {
-    margin-top: 1.5rem;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    background-color: var(--color-accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color var(--transition), transform var(--transition), color var(--transition);
-}
+        .event-form button {
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: var(--color-accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color var(--transition), transform var(--transition), color var(--transition);
+        }
 
-.event-form button:hover {
-    background-color: var(--color-accent-hover);
-    color: black;
-    transform: scale(1.05);
-}
-
-    </style>                
+        .event-form button:hover {
+            background-color: var(--color-accent-hover);
+            color: black;
+            transform: scale(1.05);
+        }
+    </style>
 
     <script>
         const gif = document.getElementById("gif-logo");
@@ -257,7 +300,7 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
 
                 <label for="event-tickets">Cantidad de boletas disponibles</label>
                 <input type="number" id="event-tickets" required>
-                
+
                 <label for="event-image">URL de la imagen del evento</label>
                 <input type="url" id="event-image" required>
 
@@ -272,8 +315,10 @@ $org_email = $is_org_logged_in ? $_SESSION['org_email'] : '';
                 <p><strong>Hora:</strong> <span id="preview-time">Hora del evento</span></p>
                 <p><strong>Lugar:</strong> <span id="preview-venue">Lugar del evento</span></p>
                 <p><strong>Precio:</strong> $<span id="preview-price">Precio del evento</span></p>
-                <p><strong>Cantidad de boletas disponibles:</strong> <span id="preview-tickets">Cantidad de boletas</span></p>
-                <img id="preview-image" src="default-image.jpg" alt="Imagen del evento" style="max-width: 100%; height: auto;">
+                <p><strong>Cantidad de boletas disponibles:</strong> <span id="preview-tickets">Cantidad de
+                        boletas</span></p>
+                <img id="preview-image" src="default-image.jpg" alt="Imagen del evento"
+                    style="max-width: 100%; height: auto;">
             </div>
         </div>
     </main>

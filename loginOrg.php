@@ -1,30 +1,43 @@
 <?php
-session_start();
-require_once 'auth_functions.php';
+session_start(); // Start the session at the very beginning
 
-// Si ya está logueado como organizador, redirigir
+require_once 'auth_functions.php'; // Make sure isOrganizerLoggedIn() and loginOrganizer() are defined here
+
+// Redirect if already logged in as an organizer
 if (isOrganizerLoggedIn()) {
-    header('Location: orgView.php');
+    header('Location: orgView.php'); // Assuming 'orgView.php' is the organizer's main dashboard
     exit();
 }
 
-$error = '';
+$error = ''; // Initialize the error variable
 
-if ($_POST) {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+// Process the form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? ''); // Use null coalescing operator for safer access
+    $password = $_POST['password'] ?? '';
 
     if (empty($email) || empty($password)) {
-        $error = 'Por favor completa todos los campos';
+        $error = 'Por favor, completa todos los campos.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Email no válido';
+        $error = 'El formato del correo electrónico no es válido.';
     } else {
-        $result = loginOrganizer($email, $password);  // Función específica para organizadores en auth_functions.php
+        // Attempt to log in the organizer
+        // Make sure loginOrganizer() returns an array with 'success', 'message', and 'organizer' data
+        $result = loginOrganizer($email, $password);
+
         if ($result['success']) {
+            // Set session variables for the organizer
+            $_SESSION['org_id'] = $result['organizer']['id'];
+            $_SESSION['org_name'] = $result['organizer']['name'];
+            $_SESSION['org_email'] = $result['organizer']['email'];
+            $_SESSION['user_role'] = 'organizer'; // Explicitly set the role for consistency
+
+            // Redirect to the organizer's dashboard
             header('Location: orgView.php');
             exit();
         } else {
-            $error = $result['message'] ?: 'Usuario o contraseña incorrectos.';
+            // Login failed, display the specific message or a generic one
+            $error = $result['message'] ?? 'Credenciales incorrectas.';
         }
     }
 }
@@ -200,7 +213,6 @@ if ($_POST) {
                 justify-content: center;
             }
         }
-        
     </style>
 </head>
 

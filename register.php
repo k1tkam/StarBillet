@@ -1,38 +1,52 @@
 <?php
-session_start();
-require_once 'auth_functions.php';
+session_start(); // Inicia la sesión al principio de tu script
 
-// Si ya está logueado, redirigir
-if (isLoggedIn()) {
-    header('Location: index.php');
-    exit();
+require_once 'auth_functions.php'; // Asegúrate de que isLoggedIn() y registerUser() estén aquí.
+
+// --- Redirección si el usuario ya está logueado ---
+// Si un usuario ya tiene una sesión activa (sea de usuario normal o de organizador/admin),
+// lo redirigimos para evitar que intente registrarse de nuevo.
+if (isset($_SESSION['user_id']) || isset($_SESSION['org_id'])) {
+    header('Location: index.php'); // Redirige a la página principal
+    exit(); // Crucial para detener la ejecución del script después de la redirección.
 }
 
-$error = '';
-$success = '';
+$error = '';    // Para mensajes de error
+$success = '';  // Para mensajes de éxito
 
-if ($_POST) {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+// --- Procesamiento del Formulario de Registro ---
+// Solo procesa el formulario si la solicitud es de tipo POST.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recopila y sanitiza los datos del formulario.
+    // Usamos el operador de fusión de null (??) para evitar errores si la clave POST no existe.
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    // Validaciones
+    // --- Validaciones de Entrada ---
     if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
-        $error = 'Por favor completa todos los campos';
+        $error = 'Por favor, completa todos los campos.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Email no válido';
+        $error = 'El formato del correo electrónico no es válido.';
     } elseif (strlen($password) < 6) {
-        $error = 'La contraseña debe tener al menos 6 caracteres';
+        $error = 'La contraseña debe tener al menos 6 caracteres.';
     } elseif ($password !== $confirm_password) {
-        $error = 'Las contraseñas no coinciden';
+        $error = 'Las contraseñas no coinciden.';
     } else {
-        // Intentar registrar usuario
+        // --- Intentar Registrar al Usuario ---
+        // Llama a la función 'registerUser()' que debe estar definida en 'auth_functions.php'.
+        // Se espera que esta función devuelva un array con 'success' (booleano) y 'message' (string).
         $result = registerUser($name, $email, $password);
 
         if ($result['success']) {
-            $success = 'Cuenta creada exitosamente. Ahora puedes <a href="login.php">iniciar sesión</a>';
+            // Si el registro fue exitoso, muestra un mensaje de éxito.
+            // Considera usar mensajes flash de sesión aquí si rediriges inmediatamente.
+            $_SESSION['message'] = '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.';
+            header('Location: login.php'); // Redirige al usuario directamente a la página de login.
+            exit();
         } else {
+            // Si el registro falló (ej. email ya existe), muestra el mensaje de error.
             $error = $result['message'];
         }
     }

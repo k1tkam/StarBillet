@@ -33,6 +33,37 @@ function registerUser($name, $email, $password)
     }
 }
 
+function registerOrg($email, $name, $password)
+{
+    try {
+        $pdo = getDBConnection();
+
+        // Verificar si el email ya existe en organizaciones
+        $stmt = $pdo->prepare("SELECT id FROM org WHERE email = ?");
+        $stmt->execute([$email]);
+
+        if ($stmt->rowCount() > 0) {
+            return ['success' => false, 'message' => 'Este email ya está registrado para una organización'];
+        }
+
+        // Encriptar la contraseña
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Insertar la nueva organización
+        $stmt = $pdo->prepare("INSERT INTO org (name, email, password) VALUES (?, ?, ?)");
+        $result = $stmt->execute([$name, $email, $hashedPassword]);
+
+        if ($result) {
+            return ['success' => true, 'message' => 'Organización registrada exitosamente'];
+        } else {
+            return ['success' => false, 'message' => 'Error al registrar la organización'];
+        }
+
+    } catch (PDOException $e) {
+        return ['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()];
+    }
+}
+
 // Función para iniciar sesión
 function loginUser($email, $password)
 {

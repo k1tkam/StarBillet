@@ -9,11 +9,12 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 // Obtener todos los eventos de la base de datos
 try {
     $pdo = getDBConnection();
-    $stmt = $pdo->query("SELECT * FROM events ORDER BY date ASC");
+    $stmt = $pdo->query("SELECT * FROM events WHERE status = 'active' ORDER BY date ASC");
     $events = $stmt->fetchAll();
 } catch (PDOException $e) {
     die("Error al obtener los eventos: " . $e->getMessage());
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

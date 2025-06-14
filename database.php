@@ -41,6 +41,16 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- Tabla de organizaciones/promotores
+CREATE TABLE IF NOT EXISTS org (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Tabla de eventos
 CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -80,6 +90,5 @@ INSERT IGNORE INTO events (name, description, date, time, venue, price, availabl
 INSERT IGNORE INTO users (name, email, password, role) 
 VALUES ('Administrador', 'admin@starbillet.com', '$2y$10$OuP936B6NQkZ82MzXVvX3emDqmFXqlxuR78L16JpUgKMC7l4bu0z2', 'admin');
 */
-
 
 ?>

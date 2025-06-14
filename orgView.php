@@ -14,8 +14,6 @@ $is_org_logged_in = true; // Establecemos esta variable como verdadera
 $org_email = htmlspecialchars($_SESSION['org_email']);
 
 // A partir de aquí, puedes incluir el resto de la lógica PHP y el HTML
-// para la vista del organizador (orgView.php o donde sea que uses este código).
-
 ?>
 
 <!DOCTYPE html>

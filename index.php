@@ -1,48 +1,87 @@
 <?php
-session_start(); // Inicia la sesión al principio de tu script
+// ¡¡¡ASEGÚRATE DE QUE NO HAYA NADA ANTES DE ESTA ETIQUETA PHP!!!
+// Esto incluye espacios en blanco, líneas vacías o cualquier carácter,
+// ya que cualquier salida antes de session_start() o header() causará errores.
+session_start(); // Inicia la sesión al principio de tu script, ¡solo una vez!
 
-// --- Configuración e Inclusiones ---
-// ¡IMPORTANTE! Asegúrate de que estas rutas sean correctas.
-// 'auth_functions.php' debería contener funciones como getAllApprovedEvents().
-// 'database.php' debería contener la función para obtener la conexión a la base de datos (e.g., getDBConnection()).
+// --- INICIO: CÓDIGO DE DEPURACIÓN (eliminar cuando todo funcione correctamente) ---
+// Estas líneas son útiles para ver errores, pero quítalas en producción.
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+// --- FIN: CÓDIGO DE DEPURACIÓN ---
+
+// Asegúrate de que los paths a tus archivos 'auth_functions.php' y 'database.php' sean correctos
 require_once 'auth_functions.php';
 require_once 'database.php';
 
+// --- LÓGICA DE REDIRECCIÓN PARA USUARIOS LOGUEADOS ---
+// Esta es la parte CLAVE para evitar que los usuarios logueados (admins, organizadores) accedan al index.
+// La prioridad de redirección es importante: de mayor a menor privilegio.
+
+// 1. Si es un ADMINISTRADOR logueado, redirige a su panel.
+// Se asume que el rol 'admin' se guarda en $_SESSION['user_role'] mediante la función loginUser().
+if (isset($_SESSION['user_id']) && ($_SESSION['user_role'] ?? '') === 'admin') {
+    header('Location: admin-dashboard.php'); // Redirige al panel de administrador
+    exit(); // Detiene la ejecución del script para asegurar la redirección
+}
+
+// 2. Si es un ORGANIZADOR logueado, redirige a su panel.
+// Esta lógica utiliza la función isOrganizerLoggedIn() que verifica la existencia de $_SESSION['org_id'].
+if (isOrganizerLoggedIn()) {
+    header('Location: orgView.php'); // Redirige al panel del organizador
+    exit(); // Detiene la ejecución del script para asegurar la redirección
+}
+
+// 3. Si es un USUARIO NORMAL logueado, decide si lo rediriges o lo dejas en el index.
+// Esta lógica utiliza isLoggedIn() que verifica la existencia de $_SESSION['user_id'].
+if (isLoggedIn()) {
+    // Si quieres que los usuarios normales sean redirigidos a su propio dashboard, descomenta las líneas siguientes:
+    // header('Location: userDashboard.php'); // Por ejemplo, a un dashboard específico para usuarios
+    // exit(); // Detiene la ejecución para la redirección
+    // Si los usuarios normales pueden ver el index (comportamiento actual), simplemente no hagas nada en este bloque.
+}
+
+// --- Fin de la LÓGICA DE REDIRECCIÓN ---
+
+
 // --- Gestión de Sesión de Usuario para el Encabezado/Barra de Navegación ---
-$is_logged_in = false; // Por defecto, no está logueado
+// Este bloque se encarga de preparar las variables para mostrar información de usuario en el encabezado,
+// solo si el usuario no fue redirigido por la lógica anterior.
+$is_logged_in = false; // Por defecto, el usuario no está logueado
 $user_name = '';
 $user_role = '';
+$user_first_name = '';
 
-// Verifica si hay una sesión de usuario normal
+// Verifica si hay una sesión de usuario regular (incluyendo administradores, ya que ambos usan 'user_id' en la sesión)
 if (isset($_SESSION['user_id'])) {
     $is_logged_in = true;
     $user_name = htmlspecialchars($_SESSION['user_name'] ?? '');
-    $user_role = htmlspecialchars($_SESSION['user_role'] ?? 'user'); // Asigna 'user' si el rol no está definido
+    $user_role = htmlspecialchars($_SESSION['user_role'] ?? 'user'); // Asigna 'user' si el rol no está definido (fallback)
 }
-// O verifica si hay una sesión de organizador
+// O verifica si hay una sesión de organizador (como un caso secundario, si la redirección inicial no ocurrió o como fallback)
 elseif (isset($_SESSION['org_id'])) {
     $is_logged_in = true;
     $user_name = htmlspecialchars($_SESSION['org_name'] ?? '');
-    $user_role = 'organizer'; // Rol específico para organizadores
+    $user_role = 'organizer'; // Asigna el rol específico para organizadores
 }
 
-// Extrae el primer nombre para mostrarlo en el encabezado, si está disponible
-$user_first_name = '';
+// Extrae el primer nombre del usuario para mostrarlo en el encabezado, si el nombre de usuario está disponible.
 if (!empty($user_name)) {
     $user_first_name = htmlspecialchars(explode(' ', $user_name)[0]);
 }
 
 // --- Recuperación de Eventos ---
-// Obtiene solo los eventos APROBADOS usando tu función dedicada.
-// Esta función (en auth_functions.php) debe encargarse de filtrar por 'status = 'approved''.
+// Obtiene solo los eventos APROBADOS desde la base de datos utilizando la función dedicada de 'auth_functions.php'.
 $events = getAllApprovedEvents();
 
 // --- Manejo de Mensajes (Mensajes Flash) ---
-// Obtiene mensajes y errores de la sesión (ej. después de un registro o compra exitosa)
+// Recupera mensajes y errores almacenados en la sesión (por ejemplo, después de una operación exitosa como el registro o una compra).
 $message = isset($_SESSION['message']) ? htmlspecialchars($_SESSION['message']) : '';
+// Corregido: Asegura que la variable $error tome el valor de $_SESSION['error'] si está seteada.
 $error = isset($_SESSION['error']) ? htmlspecialchars($_SESSION['error']) : '';
 
-// Limpia los mensajes de la sesión para que solo se muestren una vez
+// Limpia los mensajes de la sesión para que se muestren solo una vez al recargar la página.
 unset($_SESSION['message']);
 unset($_SESSION['error']);
 

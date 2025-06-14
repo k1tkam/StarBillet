@@ -70,30 +70,39 @@ function registerOrg($email, $name, $password)
 function loginUser($email, $password)
 {
     try {
-        $pdo = getDBConnection();
+        $pdo = getDBConnection(); // Asume que esta función está definida en database.php y devuelve una conexión PDO
 
+        // Prepara la consulta para seleccionar al usuario por email, incluyendo su rol.
+        // Asegúrate de que la tabla 'users' tiene columnas 'id', 'name', 'email', 'password', y 'role'.
         $stmt = $pdo->prepare("SELECT id, name, email, password, role FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC); // Obtiene los datos del usuario como un array asociativo
+
+        // Verifica si se encontró un usuario y si la contraseña coincide con el hash almacenado.
         if ($user && password_verify($password, $user['password'])) {
+            // Si la autenticación es exitosa, guarda los datos del usuario en la sesión.
+            // Esto es crucial para mantener el estado de login y el rol del usuario a través de las páginas.
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role']; // Guardar el rol en la sesion
+            $_SESSION['user_role'] = $user['role']; // <-- ¡Esta línea es fundamental para tu lógica de roles!
 
+            // Retorna un array indicando éxito y los datos del usuario (opcional, pero útil).
             return [
                 'success' => true,
                 'user' => $user
             ];
         } else {
+            // Si las credenciales son incorrectas, retorna un mensaje de error.
             return ['success' => false, 'message' => 'Credenciales incorrectas'];
         }
 
     } catch (PDOException $e) {
-        return ['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()];
+        // En caso de un error de base de datos, registra el error y retorna un mensaje general.
+        error_log("Error de base de datos en loginUser: " . $e->getMessage()); // Para depuración en logs del servidor
+        return ['success' => false, 'message' => 'Error de base de datos al intentar iniciar sesión.'];
     }
 }
-
 
 function loginOrganizer(string $email, string $password): array
 {

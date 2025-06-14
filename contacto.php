@@ -228,7 +228,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-
         <div class="right-panel">
             <h2>¿Quieres trabajar con nosotros?</h2>
             <p>¡Estamos buscando talento! Si te apasionan los eventos y quieres formar parte de nuestro equipo:</p>

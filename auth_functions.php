@@ -93,6 +93,33 @@ function loginUser($email, $password)
 }
 
 
+function loginOrganizer($email, $password) {
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT id, name, email, password FROM org WHERE email = ?");
+        $stmt->execute([$email]);
+        $org = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($org && password_verify($password, $org['password'])) {
+            $_SESSION['org_id'] = $org['id'];
+            $_SESSION['org_name'] = $org['name'];
+            $_SESSION['org_email'] = $org['email'];
+
+            return ['success' => true, 'org' => $org];
+        } else {
+            return ['success' => false, 'message' => 'Credenciales incorrectas'];
+        }
+    } catch (PDOException $e) {
+        return ['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()];
+    }
+}
+
+function isOrganizerLoggedIn()
+{
+    return isset($_SESSION['organizer_id']);
+}
+
+
 // Función para obtener información del usuario logueado
 function getCurrentUser()
 {

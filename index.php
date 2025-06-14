@@ -1,9 +1,30 @@
 <?php
-session_start();
+session_start(); // Inicia la sesión al principio de tu script
 
-// Verificar si el usuario está logueado
-$is_logged_in = isset($_SESSION['user_id']);
-$user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+// Incluye el archivo de funciones donde está getAllApprovedEvents()
+require_once 'auth_functions.php'; // ¡IMPORTANTE! Asegúrate de que esta ruta sea correcta
+
+// Variables para el header (asumiendo que manejas el login de usuarios normales y organizadores)
+$is_logged_in = isset($_SESSION['user_id']) || isset($_SESSION['org_id']); // Verifica si hay una sesión de usuario o de organizador
+$user_name = '';
+$user_role = '';
+
+if (isset($_SESSION['user_id'])) {
+    $user_name = $_SESSION['user_name'] ?? '';
+    $user_role = $_SESSION['user_role'] ?? 'user'; // Asume 'user' si no está definido
+} elseif (isset($_SESSION['org_id'])) {
+    $user_name = $_SESSION['org_name'] ?? '';
+    $user_role = 'organizer'; // Asigna un rol específico para organizadores
+}
+
+// Obtener solo los eventos APROBADOS
+$events = getAllApprovedEvents(); // Usa la función que filtra por 'approved'
+
+// Manejo de mensajes (ej. después de comprar un ticket o de un registro)
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['message']); // Limpiar el mensaje después de mostrarlo
+unset($_SESSION['error']);   // Limpiar el error después de mostrarlo
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -11,12 +32,91 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>StarBillet</title>
+    <title>StarBillet - Tu boletería de eventos</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="img/logoblanco.png">
+    <style>
+        /* Estilos adicionales para los eventos si necesitas */
+        .event-card {
+            background-color: var(--color-white);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
 
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .event-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .event-card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .event-card-content h3 {
+            margin-top: 0;
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .event-card-content p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-bottom: 5px;
+        }
+
+        .event-card-content .price {
+            font-weight: 700;
+            color: var(--color-accent);
+            font-size: 1.1rem;
+            margin-top: auto;
+            /* Empuja el precio al final */
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .message,
+        .error {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 
 <body>
@@ -38,14 +138,21 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
                 <a href="events.php" role="menuitem" tabindex="0">Eventos</a>
-                <a href="contacto.php" role="menuitem" tabindex="0">Contactanos</a>
+                <a href="contacto.php" role="menuitem" tabindex="0">Contáctanos</a>
                 <?php if ($is_logged_in): ?>
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">
-                        Hola, <?php echo htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]); ?>
+                        Hola, <?php echo htmlspecialchars(explode(' ', $user_name)[0]); ?>
                     </span>
-                    <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesion</a>
+                    <?php if ($user_role === 'admin'): ?>
+                        <a href="admin.php" role="menuitem" tabindex="0">Panel Admin</a>
+                    <?php endif; ?>
+                    <?php if ($user_role === 'organizer'): ?>
+                        <a href="organizer_dashboard.php" role="menuitem" tabindex="0">Mis Eventos</a>
+                    <?php endif; ?>
+                    <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesión</a>
                 <?php else: ?>
-                    <a href="login.php" role="menuitem" tabindex="0">Iniciar sesion</a>
+                    <a href="login.php" role="menuitem" tabindex="0">Iniciar sesión</a>
+                    <a href="register.php" class="btn-secondary" role="menuitem" tabindex="0">Registrarse</a>
                 <?php endif; ?>
             </div>
         </nav>
@@ -70,9 +177,10 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         <section class="hero">
             <div class="hero-content">
                 <div class="hero-text">
-                    <h1>Compra tus boletos para los mejores eventos</h1>
-                    <p>Fácil, rapido y seguro. Explora los eventos disponibles y asegura tu lugar hoy mismo.</p>
-                    <button class="btn-primary"><a href="#events">Comprar boletos</a></button>
+                    <h1>Tu Pasaporte a Eventos Inolvidables</h1>
+                    <p>Descubre y reserva entradas para conciertos, festivales, deportes y más. Vive la experiencia
+                        StarBillet.</p>
+                    <a href="#events" class="btn-primary">Explorar Eventos</a>
                 </div>
                 <div class="hero-video">
                     <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
@@ -83,87 +191,77 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div>
         </section>
 
-        <section id="events" class="container">
-            <h2>Eventos Destacados</h2>
-            <div class="events">
-                <article class="card">
-                    <img src="" alt="Concierto de Rock" />
-                    <div class="card-content">
-                        <h3>Concierto de Rock</h3>
-                        <div class="date-location">15 Octubre 2025 - Auditorio Nacional</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="" alt="Festival de Jazz" />
-                    <div class="card-content">
-                        <h3>Festival de Jazz</h3>
-                        <div class="date-location">22 Noviembre 2025 - Parque Central</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="" alt="Obra de Teatro" />
-                    <div class="card-content">
-                        <h3>Obra de Teatro</h3>
-                        <div class="date-location">5 Diciembre 2025 - Teatro de la Ciudad</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-            </div>
-        </section>
-
         <section id="features" class="container">
-            <h2>Por que comprar con nosotros</h2>
+            <h2>¿Por qué elegir StarBillet?</h2>
             <div class="features">
                 <div class="feature-item">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.001 12.001 0 002.928 12c0 3.072 1.05 5.927 2.825 8.204a12.002 12.002 0 008.064 2.894 12.002 12.002 0 008.064-2.894A12.001 12.001 0 0021.072 12c0-3.072-1.05-5.927-2.825-8.204z" />
                     </svg>
-                    <h3>Compra segura</h3>
-                    <p>Protegemos tu información para que compres con total tranquilidad.</p>
+                    <h3>Seguridad Garantizada</h3>
+                    <p>Compra con confianza. Tus transacciones están protegidas.</p>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <h3>Entradas Instantáneas</h3>
+                    <p>Recibe tus boletos directamente en tu email o app.</p>
                 </div>
                 <div class="feature-item">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7M16 3v4M8 3v4m0 0h8" />
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V3m0 18v-5M19 10h3m-3 4h3M1 10h3m-3 4h3m7-8v2m0 8v2M9 3h6a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z" />
                     </svg>
-                    <h3>Variedad de eventos</h3>
-                    <p>Todo tipo de eventos, cubrimos todos tus gustos y preferencias.</p>
-                </div>
-                <div class="feature-item">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 8v4l3 3m6-9v6a9 9 0 11-18 0V7a3 3 0 013 3z" />
-                    </svg>
-                    <h3>Compra rapida</h3>
-                    <p>Un proceso sin complicaciones para que no pierdas tiempo.</p>
+                    <h3>Variedad de Eventos</h3>
+                    <p>Desde conciertos hasta obras de teatro, tenemos algo para todos.</p>
                 </div>
             </div>
         </section>
 
+        <section id="events" class="container">
+            <h2>Próximos Eventos</h2>
+            <?php if (!empty($message)): ?>
+                <div class="message"><?php echo $message; ?></div>
+            <?php endif; ?>
+            <?php if (!empty($error)): ?>
+                <div class="error"><?php echo $error; ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($events)): ?>
+                <div class="events-grid">
+                    <?php foreach ($events as $event): ?>
+                        <div class="event-card" onclick="window.location.href='event_detail.php?id=<?= $event['id'] ?>'">
+                            <img src="<?= htmlspecialchars($event['image_url']) ?>"
+                                alt="<?= htmlspecialchars($event['name']) ?>">
+                            <div class="event-card-content">
+                                <h3><?= htmlspecialchars($event['name']) ?></h3>
+                                <p><strong>Fecha:</strong> <?= htmlspecialchars(date('d/m/Y', strtotime($event['date']))) ?></p>
+                                <p><strong>Hora:</strong> <?= htmlspecialchars(date('H:i', strtotime($event['time']))) ?>h</p>
+                                <p><strong>Lugar:</strong> <?= htmlspecialchars($event['venue']) ?></p>
+                                <p class="price">Precio: $<?= number_format(htmlspecialchars($event['price']), 2) ?></p>
+                                <?php if ($is_logged_in): ?>
+                                    <a href="event_detail.php?id=<?= $event['id'] ?>" class="btn-secondary">Ver detalles</a>
+                                <?php else: ?>
+                                    <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
+                                        comprar</button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p>No hay eventos disponibles en este momento. ¡Vuelve pronto!</p>
+            <?php endif; ?>
+        </section>
+
         <section id="contact" class="container">
-            <h2>Contactanos</h2>
+            <h2>Contáctanos</h2>
             <address style="font-style: normal; color: var(--color-text-muted);">
                 <span class="label">Email:</span> <a
                     href="mailto:contacto@starbillet.com">contacto@starbillet.com</a><br />
-                <span class="label">Telefono:</span> <a href="tel:+521234567890">+57 123 456 7890</a>
+                <span class="label">Teléfono:</span> <a href="tel:+521234567890">+57 123 456 7890</a>
             </address>
 
         </section>

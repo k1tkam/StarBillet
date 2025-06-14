@@ -1,16 +1,26 @@
 <?php
 session_start();
 
-// Verificar que el usuario este logueado y sea admin
-if (!isset($_SESSION["user_email"]) || $_SESSION["user_email"] !== "admin@starbillet.com") {
+// Incluir funciones necesarias
+require_once 'auth_functions.php';
+
+// Verificar que el usuario esté logueado y sea admin
+if (!isset($_SESSION["user_id"]) || ($_SESSION["user_role"] ?? 'user') !== "admin") {
+    // Si no está logueado o no es admin, redirige al index
     header("Location: index.php");
     exit();
 }
 
-// Variables para el header, similar al index.php
+// Variables para el header
 $is_logged_in = isset($_SESSION['user_id']);
 $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Obtener solo el primer nombre
+
+// Mensajes de feedback (éxito/error) desde la sesión (podrían venir de acciones en otras páginas)
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
+unset($_SESSION['message']); // Limpiar el mensaje después de mostrarlo
+unset($_SESSION['error']);   // Limpiar el error después de mostrarlo
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +34,11 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
         rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="img/logoblanco.png">
+    <style>
+        /* Elimina los estilos específicos de la tabla de eventos de aquí,
+           ya que la tabla y su gestión se moverán a view_all_events.php */
+        /* Deberías tener los estilos para .features-grid y .feature-item aquí o en style.css */
+    </style>
 </head>
 
 <body>
@@ -49,9 +64,9 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">
                         Hola, <?php echo htmlspecialchars($user_name); ?>
                     </span>
-                    <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesion</a>
+                    <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesión</a>
                 <?php else: ?>
-                    <a href="login.php" role="menuitem" tabindex="0">Iniciar sesion</a>
+                    <a href="login.php" role="menuitem" tabindex="0">Iniciar sesión</a>
                 <?php endif; ?>
             </div>
         </nav>
@@ -76,7 +91,8 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
                 <div class="hero-text">
                     <h1>Bienvenido, Administrador</h1>
                     <p>Correo: <?= htmlspecialchars($_SESSION["user_email"]) ?></p>
-                    <p>Desde aqui puedes gestionar los eventos, usuarios y contenido de tu plataforma StarBillet.</p>
+                    <p>Desde aquí puedes gestionar los eventos, usuarios y contenido de tu plataforma StarBillet.</p>
+                    <a href="logout.php" class="btn-primary">Cerrar sesión</a>
                 </div>
                 <div class="hero-video">
                     <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">
@@ -88,6 +104,13 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
         </section>
 
         <section id="management-options" class="container">
+            <?php if (!empty($message)): ?>
+                <div class="message"><?php echo $message; ?></div>
+            <?php endif; ?>
+            <?php if (!empty($error)): ?>
+                <div class="error"><?php echo $error; ?></div>
+            <?php endif; ?>
+
             <h2>Opciones de Gestion</h2>
             <div class="features">
                 <div class="feature-item">
@@ -97,7 +120,7 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
                     </svg>
                     <h3>Gestionar Eventos</h3>
                     <p>Crea, edita o elimina eventos.</p>
-                    <a href="#" class="btn-secondary">Ir a Eventos</a>
+                    <a href="view_all_events.php" class="btn-secondary" target="_blank">Ver Todos los Eventos</a>
                 </div>
                 <div class="feature-item">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,13 +142,15 @@ $user_name = $is_logged_in ? explode(' ', $_SESSION['user_name'])[0] : ''; // Ob
                 </div>
             </div>
         </section>
+        </section>
+
 
         <section id="contact" class="container">
-            <h2>Necesitas ayuda?</h2>
+            <h2>¿Necesitas ayuda?</h2>
             <address style="font-style: normal; color: var(--color-text-muted);">
                 <span class="label">Email:</span> <a
                     href="mailto:soporte@starbillet.com">soporte@starbillet.com</a><br />
-                <span class="label">Telefono:</span> <a href="tel:+521234567890">+57 123 456 7890</a>
+                <span class="label">Teléfono:</span> <a href="tel:+521234567890">+57 123 456 7890</a>
             </address>
         </section>
     </main>

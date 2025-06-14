@@ -2,11 +2,11 @@
 session_start();
 require_once 'auth_functions.php';
 
-/*// Si ya está logueado como organizador, redirigir
+// Si ya está logueado como organizador, redirigir
 if (isOrganizerLoggedIn()) {
-    header('Location: organizer_dashboard.php');
+    header('Location: orgView.php');
     exit();
-}*/
+}
 
 $error = '';
 
@@ -19,9 +19,9 @@ if ($_POST) {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Email no válido';
     } else {
-        $result = loginOrganizer($email, $password);  // Función específica para organizadores
+        $result = loginOrganizer($email, $password);  // Función específica para organizadores en auth_functions.php
         if ($result['success']) {
-            header('Location: organizer_dashboard.php');
+            header('Location: orgView.php');
             exit();
         } else {
             $error = $result['message'] ?: 'Usuario o contraseña incorrectos.';
@@ -200,8 +200,7 @@ if ($_POST) {
                 justify-content: center;
             }
         }
-
-        <?php include 'auth_styles.css'; ?>
+        
     </style>
 </head>
 

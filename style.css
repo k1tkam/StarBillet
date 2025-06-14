@@ -773,8 +773,8 @@ opacity: 1;
 }
 
 .container-event{
-  width: 100%;
+  width: 92%;
   max-width: var(--max-content-width2);
   margin: auto;
-  padding: -0.5rem 2.2rem;
+  padding: -0.2rem 1.2rem;
 }

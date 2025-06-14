@@ -1,59 +1,21 @@
 <?php
-session_start(); // Siempre inicia la sesión al principio
+session_start(); // Inicia la sesión al principio de tu script
 
-// Asegúrate de que 'auth_functions.php' contenga las funciones:
-// - isOrganizerLoggedIn(): Para verificar si ya hay un organizador logueado.
-// - loginOrganizer(): Para manejar la lógica de autenticación del organizador.
-require_once 'auth_functions.php';
-
-// --- Redirección para Organizadores Ya Logueados ---
-// Si un organizador ya tiene una sesión activa, lo redirigimos directamente a su panel.
-if (isOrganizerLoggedIn()) {
-    header('Location: orgView.php'); // Redirige al dashboard del organizador
-    exit(); // Es crucial usar exit() después de un header() para detener la ejecución del script.
+// Verifica si el organizador NO ha iniciado sesión.
+// Si no hay un 'org_id' en la sesión, redirige a la página de login de organizadores.
+if (!isset($_SESSION['org_id'])) {
+    header('Location: loginOrg.php'); // Redirige a la página de inicio de sesión del organizador
+    exit(); // Es crucial usar exit() después de un header() para detener la ejecución del script
 }
 
-$error = ''; // Inicializa la variable de error para que esté disponible en la vista HTML.
+// Si el código llega hasta aquí, significa que el organizador está logueado.
+$is_org_logged_in = true; // Establecemos esta variable como verdadera
+// Obtenemos el email del organizador desde la sesión y lo sanitizamos para mostrarlo de forma segura.
+$org_email = htmlspecialchars($_SESSION['org_email']);
 
-// --- Procesamiento del Formulario de Inicio de Sesión ---
-// Solo procesa el formulario si la solicitud es de tipo POST.
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recopila y sanitiza los datos del formulario.
-    // Usamos el operador de fusión de null (??) para evitar errores si la clave no existe.
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    // --- Validaciones de Entrada ---
-    if (empty($email) || empty($password)) {
-        $error = 'Por favor, completa todos los campos.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'El formato del correo electrónico no es válido.';
-    } else {
-        // Llama a la función que maneja la lógica de autenticación del organizador.
-        // Esperamos que esta función devuelva un array con 'success' (bool) y 'message' (string),
-        // y opcionalmente 'organizer' (array de datos del organizador) si el login es exitoso.
-        $result = loginOrganizer($email, $password);
-
-        if ($result['success']) {
-            // --- Establecimiento de Variables de Sesión para el Organizador ---
-            // Si el login fue exitoso, guardamos los datos clave del organizador en la sesión.
-            // Esto es FUNDAMENTAL para que el resto de tu aplicación sepa quién está logueado.
-            $_SESSION['org_id'] = $result['organizer']['id'];
-            $_SESSION['org_name'] = $result['organizer']['name'];
-            $_SESSION['org_email'] = $result['organizer']['email'];
-            $_SESSION['user_role'] = 'organizer'; // Establece un rol explícito para facilitar la lógica de permisos.
-
-            // Redirige al organizador a su vista principal.
-            header('Location: orgView.php');
-            exit();
-        } else {
-            // Si el login falló, muestra el mensaje de error que proviene de loginOrganizer().
-            // Si loginOrganizer() no proporciona un mensaje, usa uno genérico por seguridad.
-            $error = $result['message'] ?? 'Credenciales incorrectas.';
-        }
-    }
-}
+// A partir de aquí, puedes incluir el resto de la lógica PHP y el HTML
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 

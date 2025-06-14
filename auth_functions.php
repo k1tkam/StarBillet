@@ -95,34 +95,46 @@ function loginUser($email, $password)
 }
 
 
-function loginOrganizer($email, $password)
+function loginOrganizer(string $email, string $password): array
 {
     try {
         $pdo = getDBConnection();
+
+        // Asegúrate que esta consulta sea correcta para tu tabla 'org'
         $stmt = $pdo->prepare("SELECT id, name, email, password FROM org WHERE email = ?");
         $stmt->execute([$email]);
-        $org = $stmt->fetch(PDO::FETCH_ASSOC);
+        $organizer = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($org && password_verify($password, $org['password'])) {
-            $_SESSION['org_id'] = $org['id'];
-            $_SESSION['org_name'] = $org['name'];
-            $_SESSION['org_email'] = $org['email'];
-            $_SESSION['user_role'] = 'organizer'; // Opcional: para manejar roles en una sesion unificada
-
-            return ['success' => true, 'org' => $org];
-        } else {
-            return ['success' => false, 'message' => 'Credenciales incorrectas'];
+        if (!$organizer) {
+            return ['success' => false, 'message' => 'Email o contraseña incorrectos.'];
         }
+
+        // ¡CLAVE!: Verifica que la contraseña en la BD esté hasheada con password_hash()
+        if (password_verify($password, $organizer['password'])) {
+            return [
+                'success' => true,
+                'organizer' => [
+                    'id' => $organizer['id'],
+                    'name' => $organizer['name'],
+                    'email' => $organizer['email']
+                ]
+            ];
+        } else {
+            return ['success' => false, 'message' => 'Email o contraseña incorrectos.'];
+        }
+
     } catch (PDOException $e) {
-        return ['success' => false, 'message' => 'Error de base de datos: ' . $e->getMessage()];
+        // MUY IMPORTANTE para ver errores:
+        error_log("Error de login de organizador: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Ocurrió un error al intentar iniciar sesión.'];
     }
 }
 
-function isOrganizerLoggedIn()
+// Y tu función isOrganizerLoggedIn():
+function isOrganizerLoggedIn(): bool
 {
     return isset($_SESSION['org_id']);
 }
-
 
 // Función para obtener informacion del usuario logueado
 function getCurrentUser()

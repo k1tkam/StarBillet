@@ -228,6 +228,14 @@ nav {
   padding: 3rem 0;
 }
 
+.container-events{
+  width: 90%;
+  max-width: var(--max-content-width);
+  margin: auto;
+  padding: 3rem 0;
+}
+
+
 .container p {
   font-size: 1rem;
 }
@@ -244,6 +252,12 @@ h2 {
   font-size: 1.2rem;
   margin-bottom: 1.2rem;
   color: var(--color-primary);
+}
+
+.eventus {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 0.8fr));
 }
 
 .events {
@@ -759,22 +773,11 @@ transform: scale(1) translateY(0);
 opacity: 1;
 }
 
-.card-content-event {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+.ciudad-section{
+  margin-bottom: -4.5rem;
+  margin-top: -2rem;
 }
 
-.card-content-event h3 {
-  font-family: "Moderniz";
-  font-size: 0.8rem;
-  margin: 0 0 0.5rem;
-}
-
-.container-event{
-  width: 92%;
-  max-width: var(--max-content-width2);
-  margin: auto;
-  padding: -0.2rem 1.2rem;
+.eventus{
+  margin-bottom: -4rem;
 }

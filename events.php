@@ -1,9 +1,19 @@
 <?php
+require_once 'database.php';
 session_start();
 
-// Verificar si el usuario está logueado
+// Verifica si el usuario ha iniciado sesión
 $is_logged_in = isset($_SESSION['user_id']);
 $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+
+// Obtener todos los eventos de la base de datos
+try {
+    $pdo = getDBConnection();
+    $stmt = $pdo->query("SELECT * FROM events ORDER BY date ASC");
+    $events = $stmt->fetchAll();
+} catch (PDOException $e) {
+    die("Error al obtener los eventos: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -39,7 +49,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div></a>
             </div>
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
-                <a href="#events" role="menuitem" tabindex="0">Eventos</a>
+                <a href="events.php" role="menuitem" tabindex="0">Eventos</a>
                 <a href="contacto.php" role="menuitem" tabindex="0">Contactanos</a>
                 <?php if ($is_logged_in): ?>
                     <span style="color: var(--color-text-muted); font-size: 0.9rem;">
@@ -75,7 +85,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             <i class="fas fa-search"></i>
         </div>
         <div class="filters">
-            <button onclick="openCityModal()"><i class="fas fa-location-dot"></i> BOGOTA</button>
+            <button onclick="openCityModal()"><i class="fas fa-location-dot"></i> BOGOTÁ</button>
             <button onclick="openDateModal()"><i class="fas fa-calendar"></i> FECHA</button>
             <button onclick="openPriceModal()"><i class="fas fa-dollar-sign"></i> PRECIO</button>
         </div>
@@ -225,67 +235,60 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 
    
 
-    <section>
+    <section class="ciudad-section">
     <div style="text-align: center; padding: 2rem 0;">
         <h2 id="selectedCityDisplay">Eventos en BOGOTA</h2>
     </div>
     </section>
 
-    <section id="events" class="container-event">
-            <div class="events">
-                <article class="card">
-                    <img src="" alt="Concierto de Rock" />
-                    <div class="card-content-event">
-                        <h3>Concierto de Rock</h3>
-                        <div class="date-location">15 Octubre 2025 - Auditorio Nacional</div>
+    <section id="events" class="container-events">
+    <div class="eventus">
+        <?php if (count($events) > 0): ?>
+            <?php foreach ($events as $event): ?>
+                <article class="card" style="min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <img src="<?= htmlspecialchars($event['image_url']) ?>" alt="<?= htmlspecialchars($event['name']) ?>" style="width: 100%; border-radius: 6px;" />
+                    <div class="card-content" style="margin-top: 0.75rem;">
+                        <h3 style="font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem;">
+                            <?= htmlspecialchars($event['name']) ?>
+                        </h3>
+                        
+                        <div class="date-location" style="font-size: 0.8rem; font-weight: 500; margin-bottom: 0.3rem;">
+                            <?= date('D, d M', strtotime($event['date'])) ?> - <?= htmlspecialchars($event['venue']) ?>
+                        </div>
+
+                        <div class="price" style="font-size: 1rem; font-weight: bold; margin-bottom: 0.75rem; text-align: center;">
+                            <?= $event['price'] == 0 ? 'Desde Gratis' : 'Precio: $' . number_format($event['price'], 2) ?>
+                        </div>
+
                         <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
+                            <button class="btn-secondary"
+                                style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                    background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                    display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                    transition: background-color 0.3s, color 0.3s;"
+                                onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
+                                Comprar ahora
+                            </button>
                         <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
+                            <button class="btn-secondary"
+                                onclick="window.location.href='login.php'"
+                                style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                    background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                    display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                    transition: background-color 0.3s, color 0.3s;"
+                                onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
+                                Inicia sesión para comprar
+                            </button>
                         <?php endif; ?>
                     </div>
                 </article>
-                <article class="card">
-                    <img src="" alt="Festival de Jazz" />
-                    <div class="card-content-event">
-                        <h3>Festival de Jazz</h3>
-                        <div class="date-location">22 Noviembre 2025 - Parque Central</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesion para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="" alt="Obra de Teatro" />
-                    <div class="card-content-event">
-                        <h3>Obra de Teatro</h3>
-                        <div class="date-location">5 Diciembre 2025 - Teatro de la Ciudad</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-                <article class="card">
-                    <img src="" alt="Jimmy Gutierrez" />
-                    <div class="card-content-event">
-                        <h3>Jimmy Gutierrez Tour</h3>
-                        <div class="date-location">5 Diciembre 2025 - Plaza España</div>
-                        <?php if ($is_logged_in): ?>
-                            <button class="btn-secondary">Comprar ahora</button>
-                        <?php else: ?>
-                            <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
-                                comprar</button>
-                        <?php endif; ?>
-                    </div>
-                </article>
-            </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p>No se encontraron eventos con los filtros aplicados.</p>
+        <?php endif; ?>
+    </div>
     </section>
 
 
@@ -297,7 +300,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                 <span class="label">Telefono:</span> <a href="tel:+521234567890">+57 123 456 7890</a>
             </address>
 
-    </section>
+        </section>
 
         <footer>
         &copy; 2025 StarBillet. Todos los derechos reservados.

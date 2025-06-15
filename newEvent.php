@@ -1,11 +1,37 @@
 <?php
 session_start(); // Inicia la sesión al principio de tu script
 
+require_once 'auth_functions.php'; // <-- Agrega esta línea
+
 // Verifica si el organizador NO ha iniciado sesión.
 // Si no hay un 'org_id' en la sesión, redirige a la página de login de organizadores.
 if (!isset($_SESSION['org_id'])) {
     header('Location: loginOrg.php'); // Redirige a la página de inicio de sesión del organizador
     exit(); // Es crucial usar exit() después de un header() para detener la ejecución del script
+}
+
+$error = '';    // Para mensajes de error
+$success = '';  // Para mensajes de éxito
+
+$name = trim($_POST['name'] ?? '');
+$description = trim($_POST['description'] ?? '');
+$date = trim($_POST['date'] ?? '');
+$time = trim($_POST['time'] ?? '');
+$venue = trim($_POST['venue'] ?? '');
+$city = trim($_POST['city'] ?? '');
+$price = trim($_POST['price'] ?? '');
+$tickets = trim($_POST['tickets'] ?? '');
+$image = trim($_POST['image'] ?? '');
+
+if($name && $description && $date && $time && $venue && $city && $price && $tickets && $image) {
+
+    $org_id = $_SESSION['org_id']; // <-- Obtén el ID del organizador de la sesión
+    $result = registerEvent($name, $description, $date, $time, $venue, $city, $price, $tickets, $image, $org_id);
+
+    $success = 'Evento creado exitosamente.';
+} else {
+
+    $error = 'Por favor, completa todos los campos.';
 }
 
 // Si el código llega hasta aquí, significa que el organizador está logueado.
@@ -241,30 +267,33 @@ $org_email = htmlspecialchars($_SESSION['org_email']);
 
     <main>
         <div class="event-layout">
-            <form class="event-form">
+            <form class="event-form" method="POST" action="">
                 <label for="event-name">Nombre del evento</label>
-                <input type="text" id="event-name" required>
+                <input type="text" id="event-name" name="name" required>
 
                 <label for="event-description">Breve descripción y detalles</label>
-                <input type="text" id="event-description" required>
+                <input type="text" id="event-description" name="description" required>
 
                 <label for="event-date">Fecha</label>
-                <input type="date" id="event-date" required>
+                <input type="date" id="event-date" name="date" required>
 
                 <label for="event-time">Hora</label>
-                <input type="time" id="event-time" required>
+                <input type="time" id="event-time" name="time" required>
 
                 <label for="event-venue">Lugar</label>
-                <input type="text" id="event-venue" required>
+                <input type="text" id="event-venue" name="venue" required>
+
+                <label for="event-city">Ciudad</label>
+                <input type="text" id="event-city" name="city" required>
 
                 <label for="event-price">Precio unitario de boleta</label>
-                <input type="number" id="event-price" required>
+                <input type="number" id="event-price" name="price" required>
 
                 <label for="event-tickets">Cantidad de boletas disponibles</label>
-                <input type="number" id="event-tickets" required>
+                <input type="number" id="event-tickets" name="tickets" required>
 
                 <label for="event-image">URL de la imagen del evento</label>
-                <input type="url" id="event-image" required>
+                <input type="url" id="event-image" name="image" required>
 
                 <button type="submit" class="btnprimarycontacto">Crear evento</button>
             </form>

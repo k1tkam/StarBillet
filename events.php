@@ -14,7 +14,7 @@ $selected_city = isset($_GET['city']) && !empty($_GET['city']) ? trim($_GET['cit
 $selected_date = isset($_GET['date']) ? trim($_GET['date']) : '';
 $max_price = isset($_GET['price']) ? (int) $_GET['price'] : null;
 
-$where_clauses = ["status = 'approved'"];
+$where_clauses = ["status = 'approved'", "available_tickets > 0"];
 $params = [];
 
 // Filtro por búsqueda general (nombre del evento, sala, ciudad)
@@ -278,7 +278,7 @@ try {
 
         function applyFilters() {
             const queryString = buildQueryString();
-            window.location.href = `index.php?${queryString}`;
+            window.location.href = `events.php?${queryString}`;
         }
 
         // --- Ciudad Modal ---

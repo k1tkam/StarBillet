@@ -396,4 +396,26 @@ function getRandomEvents($limit = 5, $exclude_id = null) {
     }
 }
 
+// Sección de eventos para el organizador
+function registerEvent($name, $description, $date, $time, $venue, $city, $price, $available_tickets, $image_url, $org_id)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare(
+            "INSERT INTO events (name, description, date, time, venue, city, price, available_tickets, image_url, org_id, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')"
+        );
+        $result = $stmt->execute([$name, $description, $date, $time, $venue, $city, $price, $available_tickets, $image_url, $org_id]);
+
+        if ($result) {
+            return ['success' => true, 'message' => 'Evento registrado exitosamente y pendiente de aprobación.'];
+        } else {
+            return ['success' => false, 'message' => 'Error al registrar el evento.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al registrar evento: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al registrar evento: ' . $e->getMessage()];
+    }
+}
+
 ?>

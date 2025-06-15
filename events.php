@@ -436,7 +436,7 @@ try {
     </section>
 
    <section id="events" class="container-events">
-        <<section id="events" class="container-events">
+        <section id="events" class="container-events">
     <h2>Próximos Eventos</h2>
     <?php if (!empty($message)): ?>
         <div class="message"><?php echo $message; ?></div>

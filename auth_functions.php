@@ -181,7 +181,7 @@ function getAllApprovedEvents()
     try {
         $pdo = getDBConnection();
         // Solo selecciona eventos con estado 'approved' y que no hayan pasado
-        $stmt = $pdo->prepare("SELECT * FROM events WHERE status = 'approved' AND date >= CURDATE() ORDER BY date ASC");
+        $stmt = $pdo->prepare("SELECT * FROM events WHERE status = 'approved' AND date >= CURDATE() AND available_tickets > 0 ORDER BY date ASC, time ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {

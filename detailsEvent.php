@@ -44,6 +44,28 @@ if (!$event) {
     exit();
 }
 
+$organizer_name = '';
+if (!empty($event['org_id'])) {
+    $pdo = getDBConnection();
+    $stmt = $pdo->prepare("SELECT name FROM org WHERE id = ?");
+    $stmt->execute([$event['org_id']]);
+    $org = $stmt->fetch(PDO::FETCH_ASSOC);
+    $organizer_name = $org ? $org['name'] : '';
+}
+
+$purchase_result = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in && isset($_POST['quantity'])) {
+    $quantity = max(1, intval($_POST['quantity']));
+    $user_id = $_SESSION['user_id'] ?? null;
+    if ($user_id) {
+        // Simulación de pago automático: aquí podrías integrar un gateway real
+        // pero para efectos de prueba, asumimos que el pago siempre es exitoso.
+        $purchase_result = purchaseTicket($user_id, $event_id, $quantity);
+        // Refrescar datos del evento para mostrar los tickets restantes actualizados
+        $event = getEventById($event_id);
+    }
+}
+
 // --- Manejo de Mensajes ---
 $message = isset($_SESSION['message']) ? htmlspecialchars($_SESSION['message']) : '';
 $error = isset($_SESSION['error']) ? htmlspecialchars($_SESSION['error']) : '';
@@ -329,24 +351,32 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
                     <div class="price-note">Este es el precio final. Sin cargos ocultos.</div>
                 </div>
                 
-                <?php if ($is_logged_in): ?>
-                    <button class="btn-buy" <?= $event['available_tickets'] <= 0 ? 'disabled' : '' ?>>
-                        <?= $event['available_tickets'] > 0 ? 'Comprar entradas' : 'Entradas agotadas' ?>
-                    </button>
-                <?php else: ?>
-                    <button class="btn-buy" onclick="window.location.href='login.php'">
-                        Iniciar sesión para comprar
-                    </button>
-                <?php endif; ?>
-                
-                <div class="info-note">
-                    StarBillet protege contra la reventa ilegal. Tus entradas están seguras con nosotros.
+
+            <?php if ($is_logged_in): ?>
+            <form method="post" style="margin: 0;">
+                <label for="quantity" style="font-size:1rem;">Cantidad:</label>
+                <input type="number" id="quantity" name="quantity" min="1" max="<?= $event['available_tickets'] ?>" value="1" style="width:60px;" <?= $event['available_tickets'] <= 0 ? 'disabled' : '' ?>>
+                <button type="submit" class="btn-buy" <?= $event['available_tickets'] <= 0 ? 'disabled' : '' ?>>
+                    <?= $event['available_tickets'] > 0 ? 'Comprar entradas' : 'Entradas agotadas' ?>
+                </button>
+            </form>
+            <?php if ($purchase_result): ?>
+                <div style="margin-top:15px; font-size:1.1rem; color:<?= $purchase_result['success'] ? 'green' : 'red' ?>;">
+                    <?= htmlspecialchars($purchase_result['message']) ?>
+                    <?php if (!empty($purchase_result['ticket_code'])): ?>
+                        <br><strong>Código de ticket:</strong> <?= htmlspecialchars($purchase_result['ticket_code']) ?>
+                    <?php endif; ?>
                 </div>
-                
-                <div class="event-description">
-                    <h3>Información del evento</h3>
-                    <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
-                </div>
+            <?php endif; ?>
+        <?php else: ?>
+    <div class="info-note">
+        StarBillet protege contra la reventa ilegal. Tus entradas están seguras con nosotros.
+    </div>
+    <div class="event-description">
+        <h3>Información del evento</h3>
+        <p><?= nl2br(htmlspecialchars($event['description'])) ?></p>
+    </div>
+<?php endif; ?>
             </div>
         </div>
 
@@ -368,6 +398,15 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
                 <p style="display: flex; align-items: center; justify-content: center; color: #555; font-size: 1.3rem;">
                     Apertura de puertas: <?= $door_opening_time ?> (2 horas antes del evento)
                 </p>
+
+                <p style="display: flex; align-items: center; justify-content: center; color: #555; font-size: 1.3rem;">
+                    Boletas disponibles: <strong style="margin-left: 6px;"><?= htmlspecialchars($event['available_tickets']) ?></strong>
+                </p>
+
+                <!-- Mostrar nombre del organizador -->
+                <p style="display: flex; align-items: center; justify-content: center; color: #555; font-size: 1.3rem;">
+                    Organizador: <strong style="margin-left: 6px;"><?= htmlspecialchars($organizer_name) ?></strong>
+                </p>
                 
                 <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
                     <a href="https://maps.google.com/?q=<?= urlencode($event['full_address'] ?? $event['venue'].', '.$event['city']) ?>" 
@@ -382,7 +421,7 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
     </div>
 
     <?php
-    $random_events = getRandomEvents(5, $event_id); // trae 5 eventos aleatorios para mostrar
+    $random_events = getRandomEvents(4, $event_id); // trae 5 eventos aleatorios para mostrar
     ?>
 
     <div class="recommended-events" style="margin: 80px auto; max-width: 1200px;">

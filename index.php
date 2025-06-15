@@ -99,7 +99,6 @@ unset($_SESSION['error']);
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="img/logoblanco.png">
     <style>
-        /* Estilos adicionales para los eventos si necesitas */
         .event-card {
             background-color: var(--color-white);
             border-radius: 10px;
@@ -203,9 +202,6 @@ unset($_SESSION['error']);
                     <a href="contacto.php" role="menuitem" tabindex="0">Contáctanos</a>
                 <?php endif; ?>
                 <?php if ($is_logged_in): ?>
-                    <span style="color: var(--color-text-muted); font-size: 0.9rem;">
-                        Hola, <?php echo htmlspecialchars(explode(' ', $user_name)[0]); ?>
-                    </span>
                     <?php if ($user_role === 'admin'): ?>
                         <a href="admin.php" role="menuitem" tabindex="0">Panel Admin</a>
                     <?php endif; ?>
@@ -291,11 +287,10 @@ unset($_SESSION['error']);
             <?php if (!empty($error)): ?>
                 <div class="error"><?php echo $error; ?></div>
             <?php endif; ?>
-
             <?php if (!empty($events)): ?>
                 <div class="events-grid">
                     <?php foreach ($events as $event): ?>
-                        <div class="event-card" onclick="window.location.href='event_detail.php?id=<?= $event['id'] ?>'">
+                        <div class="event-card" onclick="window.location.href='detailsEvent.php?id=<?= $event['id'] ?>'">
                             <img src="<?= htmlspecialchars($event['image_url']) ?>"
                                 alt="<?= htmlspecialchars($event['name']) ?>">
                             <div class="event-card-content">
@@ -305,10 +300,23 @@ unset($_SESSION['error']);
                                 <p><strong>Lugar:</strong> <?= htmlspecialchars($event['venue']) ?></p>
                                 <p class="price">Precio: $<?= number_format(htmlspecialchars($event['price']), 2) ?></p>
                                 <?php if ($is_logged_in): ?>
-                                    <a href="event_detail.php?id=<?= $event['id'] ?>" class="btn-secondary">Ver detalles</a>
+                                    <button class="btn-secondary" style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                            background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                            display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                            transition: background-color 0.3s, color 0.3s;"
+                                        onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                        onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
+                                        Comprar ahora
+                                    </button>
                                 <?php else: ?>
-                                    <button class="btn-secondary" onclick="window.location.href='login.php'">Inicia sesión para
-                                        comprar</button>
+                                    <button class="btn-secondary" onclick="window.location.href='login.php'" style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                            background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                            display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                            transition: background-color 0.3s, color 0.3s;"
+                                        onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                        onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
+                                        Inicia sesión para comprar
+                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>

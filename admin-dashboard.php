@@ -83,9 +83,6 @@ unset($_SESSION['error']);
             <div class="nav-links" role="menu" style="display: flex; align-items: center; gap: 1rem;">
                 <a href="#admin-panel" role="menuitem" tabindex="0">Panel de Administrador</a>
                 <?php if ($is_logged_in): ?>
-                    <span style="color: var(--color-text-muted); font-size: 0.9rem;">
-                        Hola, <?php echo htmlspecialchars($user_name); ?>
-                    </span>
                     <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesión</a>
                 <?php else: ?>
                     <a href="login.php" role="menuitem" tabindex="0">Iniciar sesión</a>

@@ -90,7 +90,86 @@ try {
     <link rel="icon" type="image/png" href="img/logoblanco.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://kit.fontawesome.com/YOUR_FONT_AWESOME_KIT_ID.js" crossorigin="anonymous"></script>
+    
+    <style>
+        .event-card {
+            background-color: var(--color-white);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
 
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .event-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .event-card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .event-card-content h3 {
+            margin-top: 0;
+            color: var(--color-primary);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .event-card-content p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            margin-bottom: 5px;
+        }
+
+        .event-card-content .price {
+            font-weight: 700;
+            color: var(--color-accent);
+            font-size: 1.1rem;
+            margin-top: auto;
+            /* Empuja el precio al final */
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .message,
+        .error {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 
 <body>
@@ -356,49 +435,65 @@ try {
         </div>
     </section>
 
-    <section id="events" class="container-events">
-        <div class="eventus">
-            <?php if (count($events) > 0): ?>
-                <?php foreach ($events as $event): ?>
-                    <article class="card">
-                        <img src="<?= htmlspecialchars($event['image_url']) ?>" alt="<?= htmlspecialchars($event['name']) ?>" />
-                        <div class="card-content">
-                            <h3><?= htmlspecialchars($event['name']) ?></h3>
-                            <div class="date-location">
-                                <?= date('D, d M', strtotime($event['date'])) ?> -
-                                <?= htmlspecialchars($event['venue']) ?>
-                            </div>
-                            <div class="price">
-                                <?= $event['price'] == 0 ? 'Desde Gratis' : 'Precio: $' . number_format($event['price'], 2, ',', '.') ?>
-                            </div>
-                            <?php if ($is_logged_in): ?>
-                                <button class="btn-secondary" style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
-                                        background-color: #000; color: #fff; border: none; border-radius: 5px;
-                                        display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
-                                        transition: background-color 0.3s, color 0.3s;"
-                                    onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
-                                    onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
-                                    Comprar ahora
-                                </button>
-                            <?php else: ?>
-                                <button class="btn-secondary" onclick="window.location.href='login.php'" style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
-                                        background-color: #000; color: #fff; border: none; border-radius: 5px;
-                                        display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
-                                        transition: background-color 0.3s, color 0.3s;"
-                                    onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
-                                    onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';">
-                                    Inicia sesión para comprar
-                                </button>
-                            <?php endif; ?>
+   <section id="events" class="container-events">
+        <<section id="events" class="container-events">
+    <h2>Próximos Eventos</h2>
+    <?php if (!empty($message)): ?>
+        <div class="message"><?php echo $message; ?></div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+        <div class="error"><?php echo $error; ?></div>
+    <?php endif; ?>
+    
+    <div class="eventus">
+        <?php if (!empty($events)): ?>
+            <?php foreach ($events as $event): ?>
+                <article class="card" onclick="window.location.href='detailsEvent.php?id=<?= $event['id'] ?>'">
+                    <img src="<?= htmlspecialchars($event['image_url']) ?>" 
+                         alt="<?= htmlspecialchars($event['name']) ?>" />
+                    <div class="card-content">
+                        <h3><?= htmlspecialchars($event['name']) ?></h3>
+                        <div class="date-location">
+                            <?= date('d/m/Y', strtotime($event['date'])) ?> • 
+                            <?= htmlspecialchars(date('H:i', strtotime($event['time']))) ?>h<br>
+                            <?= htmlspecialchars($event['venue']) ?>
                         </div>
-                    </article>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p style="text-align: center; width: 100%;">No se encontraron eventos disponibles con los filtros aplicados.
-                </p>
-            <?php endif; ?>
-        </div>
-    </section>
+                        <div class="price">
+                            <?= $event['price'] == 0 ? 'Gratis' : '$'.number_format($event['price'], 2, ',', '.') ?>
+                        </div>
+                        <?php if ($is_logged_in): ?>
+                            <button class="btn-secondary" 
+                                    style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                           background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                           display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                           transition: background-color 0.3s, color 0.3s;"
+                                    onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                    onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';"
+                                    onclick="event.stopPropagation(); window.location.href='detailsEvent.php?id=<?= $event['id'] ?>'">
+                                Ver detalles
+                            </button>
+                        <?php else: ?>
+                            <button class="btn-secondary" 
+                                    style="padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 500;
+                                           background-color: #000; color: #fff; border: none; border-radius: 5px;
+                                           display: block; margin: 0 auto; margin-top: auto; margin-bottom: 0.75rem;
+                                           transition: background-color 0.3s, color 0.3s;"
+                                    onmouseover="this.style.backgroundColor='#fff'; this.style.color='#000';"
+                                    onmouseout="this.style.backgroundColor='#000'; this.style.color='#fff';"
+                                    onclick="event.stopPropagation(); window.location.href='login.php'">
+                                Inicia sesión
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p style="text-align: center; width: 100%;">
+                No hay eventos disponibles con los filtros aplicados. ¡Prueba con otros parámetros!
+            </p>
+        <?php endif; ?>
+    </div>
+</section>
 
     <section id="contact" class="container">
         <h2>Contáctanos</h2>

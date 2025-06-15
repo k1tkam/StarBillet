@@ -279,12 +279,11 @@ function createEvent($name, $description, $date, $time, $venue, $price, $availab
 
 
 // Función para obtener un evento por ID
-function getEventById($id)
-{
+function getEventById($event_id) {
     try {
         $pdo = getDBConnection();
-        $stmt = $pdo->prepare("SELECT * FROM events WHERE id = ?");
-        $stmt->execute([$id]);
+        $stmt = $pdo->prepare("SELECT * FROM events WHERE id = ? AND status = 'approved'");
+        $stmt->execute([$event_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error al obtener evento por ID: " . $e->getMessage());
@@ -373,6 +372,26 @@ function getUserTickets($userId)
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error al obtener tickets de usuario: " . $e->getMessage());
+        return [];
+    }
+}
+
+function getRandomEvents($limit = 5, $exclude_id = null) {
+    try {
+        $pdo = getDBConnection();
+        // Construir la consulta base
+        $query = "SELECT * FROM events WHERE status = 'approved' AND date >= CURDATE()";
+        // Excluir evento específico si se proporciona
+        if ($exclude_id) {
+            $query .= " AND id != " . intval($exclude_id);
+        }
+        // Orden aleatorio y límite
+        $query .= " ORDER BY RAND() LIMIT " . intval($limit);
+        $stmt = $pdo->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+    } catch (PDOException $e) {
+        error_log("Error al obtener eventos aleatorios: " . $e->getMessage());
         return [];
     }
 }

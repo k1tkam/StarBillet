@@ -95,6 +95,10 @@ INSERT INTO events (
 (9, 'Rock al Parque 2025', 'El festival gratuito más grande de rock en Latinoamérica, celebrando su 30 aniversario.', '2025-07-20', '12:00:00', 'Parque Simón Bolívar', 'Bogota', 0.00, 2000, 'https://rockalparque.gov.co/sites/default/files/memory-cover/Rock%20al%20Parque%202024.jpeg', 'approved', '2025-06-13 12:47:52', '2025-06-13 12:52:03'),
 (10, 'Maratón de Medellín 2025', 'Competencia atlética en las principales calles de la ciudad, con categorías para todos.', '2025-09-07', '06:30:00', 'Calles de Medellín', 'Medellín', 80000.00, 800, 'https://maratonmedellin.com/cdn/shop/files/Imagen_1200x628_82408f0d-ea94-4898-8aa3-c27740958ea9.png?v=1734472641', 'approved', '2025-06-13 12:47:52', '2025-06-13 12:52:03'),
 (11, 'Me bebí lo del mercado world tour', 'Pa las que sea, un concierto inolvidable con el artista del momento.', '2025-09-07', '06:30:00', 'Movistar Arena', 'Bogota', 80000.00, 800, 'https://www.elnuevodia.com.co/nuevodia/sites/default/files/imagenes/2024/08/foto%20enlace%20facebook%20(30)_0.jpg', 'approved', '2025-06-13 12:47:52', '2025-06-13 12:52:03');
+
+INSERT INTO users (name, email, password, role)
+VALUES ('Juan Pérez', 'juan@example.com', '123', 'admin');
 */
+
 
 ?>

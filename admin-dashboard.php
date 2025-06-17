@@ -148,7 +148,7 @@ unset($_SESSION['error']);
                     </svg>
                     <h3>Gestionar Usuarios</h3>
                     <p>Administra las cuentas de usuario.</p>
-                    <a href="#" class="btn-secondary">Ir a Usuarios</a>
+                    <a href="manage_users_orgs.php" class="btn-secondary" target="_blank">Ir a Usuarios</a>
                 </div>
                 <div class="feature-item">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

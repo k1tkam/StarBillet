@@ -279,7 +279,8 @@ function createEvent($name, $description, $date, $time, $venue, $price, $availab
 
 
 // Función para obtener un evento por ID
-function getEventById($event_id) {
+function getEventById($event_id)
+{
     try {
         $pdo = getDBConnection();
         $stmt = $pdo->prepare("SELECT * FROM events WHERE id = ? AND status = 'approved'");
@@ -376,7 +377,8 @@ function getUserTickets($userId)
     }
 }
 
-function getRandomEvents($limit = 5, $exclude_id = null) {
+function getRandomEvents($limit = 5, $exclude_id = null)
+{
     try {
         $pdo = getDBConnection();
         // Construir la consulta base
@@ -389,7 +391,7 @@ function getRandomEvents($limit = 5, $exclude_id = null) {
         $query .= " ORDER BY RAND() LIMIT " . intval($limit);
         $stmt = $pdo->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
     } catch (PDOException $e) {
         error_log("Error al obtener eventos aleatorios: " . $e->getMessage());
         return [];
@@ -415,6 +417,348 @@ function registerEvent($name, $description, $date, $time, $venue, $city, $price,
     } catch (PDOException $e) {
         error_log("Error al registrar evento: " . $e->getMessage());
         return ['success' => false, 'message' => 'Error de base de datos al registrar evento: ' . $e->getMessage()];
+    }
+    // auth_functions.php (Añadir estas funciones al final del archivo)
+
+    // Función para obtener todos los usuarios
+    function getAllUsers()
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("SELECT id, name, email, role FROM users ORDER BY name ASC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener todos los usuarios: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Función para obtener todos los organizadores
+    function getAllOrganizers()
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("SELECT id, name, email FROM org ORDER BY name ASC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener todos los organizadores: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Función para obtener un usuario por ID
+    function getUserById($id)
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("SELECT id, name, email, role FROM users WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener usuario por ID: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    // Función para obtener un organizador por ID
+    function getOrganizerById($id)
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("SELECT id, name, email FROM org WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error al obtener organizador por ID: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    // Función para actualizar la información de un usuario
+// NOTA: No permitir cambiar la contraseña directamente desde aquí, solo otros datos.
+// Para contraseña, sería otra función o un formulario específico con verificación.
+    function updateUser($id, $name, $email, $role)
+    {
+        try {
+            $pdo = getDBConnection();
+            // Opcional: Validar que el rol sea uno permitido, ej: 'user', 'admin'
+            if (!in_array($role, ['user', 'admin'])) {
+                return ['success' => false, 'message' => 'Rol de usuario no válido.'];
+            }
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?");
+            $result = $stmt->execute([$name, $email, $role, $id]);
+            if ($result) {
+                return ['success' => true, 'message' => 'Usuario actualizado exitosamente.'];
+            } else {
+                return ['success' => false, 'message' => 'Error al actualizar el usuario.'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error al actualizar usuario: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al actualizar usuario: ' . $e->getMessage()];
+        }
+    }
+
+    // Función para actualizar la información de un organizador
+    function updateOrganizer($id, $name, $email)
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("UPDATE org SET name = ?, email = ? WHERE id = ?");
+            $result = $stmt->execute([$name, $email, $id]);
+            if ($result) {
+                return ['success' => true, 'message' => 'Organización actualizada exitosamente.'];
+            } else {
+                return ['success' => false, 'message' => 'Error al actualizar la organización.'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error al actualizar organizador: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al actualizar organización: ' . $e->getMessage()];
+        }
+    }
+
+    // Opcional: Funciones para eliminación lógica (cambiar estado 'active' a 'inactive' o similar)
+// Si tu tabla users/org tiene una columna 'status' (ej. 'active', 'inactive', 'deleted')
+    function deleteUserSoft($userId)
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("UPDATE users SET status = 'inactive' WHERE id = ?"); // Asume columna 'status'
+            $result = $stmt->execute([$userId]);
+            if ($result) {
+                return ['success' => true, 'message' => 'Usuario marcado como inactivo.'];
+            } else {
+                return ['success' => false, 'message' => 'Error al inactivar usuario.'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error al inactivar usuario: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al inactivar usuario.'];
+        }
+    }
+
+    function deleteOrganizerSoft($orgId)
+    {
+        try {
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("UPDATE org SET status = 'inactive' WHERE id = ?"); // Asume columna 'status'
+            $result = $stmt->execute([$orgId]);
+            if ($result) {
+                return ['success' => true, 'message' => 'Organización marcada como inactiva.'];
+            } else {
+                return ['success' => false, 'message' => 'Error al inactivar organización.'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error al inactivar organización: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al inactivar organización.'];
+        }
+    }
+
+    // Función para eliminar un usuario de forma permanente (usar con EXTREMA PRECAUCIÓN)
+    function deleteUserPermanent($userId)
+    {
+        try {
+            $pdo = getDBConnection();
+            // Considera eliminar tickets asociados u otras dependencias para evitar errores de FK
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $pdo->commit();
+            return ['success' => true, 'message' => 'Usuario eliminado permanentemente.'];
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            error_log("Error al eliminar usuario permanentemente: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al eliminar usuario.'];
+        }
+    }
+
+    // Función para eliminar un organizador de forma permanente (usar con EXTREMA PRECAUCIÓN)
+    function deleteOrganizerPermanent($orgId)
+    {
+        try {
+            $pdo = getDBConnection();
+            // Considera eliminar eventos asociados u otras dependencias para evitar errores de FK
+            $pdo->beginTransaction();
+            $stmt = $pdo->prepare("DELETE FROM org WHERE id = ?");
+            $stmt->execute([$orgId]);
+            $pdo->commit();
+            return ['success' => true, 'message' => 'Organización eliminada permanentemente.'];
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            error_log("Error al eliminar organización permanentemente: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al eliminar organización.'];
+        }
+    }
+}
+// auth_functions.php (Añadir estas funciones al final del archivo)
+
+// Función para obtener todos los usuarios
+function getAllUsers()
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT id, name, email, role FROM users ORDER BY name ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al obtener todos los usuarios: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Función para obtener todos los organizadores
+function getAllOrganizers()
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT id, name, email FROM org ORDER BY name ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al obtener todos los organizadores: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Función para obtener un usuario por ID
+function getUserById($id)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT id, name, email, role FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al obtener usuario por ID: " . $e->getMessage());
+        return null;
+    }
+}
+
+// Función para obtener un organizador por ID
+function getOrganizerById($id)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("SELECT id, name, email FROM org WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al obtener organizador por ID: " . $e->getMessage());
+        return null;
+    }
+}
+
+// Función para actualizar la información de un usuario
+// NOTA: No permitir cambiar la contraseña directamente desde aquí, solo otros datos.
+// Para contraseña, sería otra función o un formulario específico con verificación.
+function updateUser($id, $name, $email, $role)
+{
+    try {
+        $pdo = getDBConnection();
+        // Opcional: Validar que el rol sea uno permitido, ej: 'user', 'admin'
+        if (!in_array($role, ['user', 'admin'])) {
+            return ['success' => false, 'message' => 'Rol de usuario no válido.'];
+        }
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?");
+        $result = $stmt->execute([$name, $email, $role, $id]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Usuario actualizado exitosamente.'];
+        } else {
+            return ['success' => false, 'message' => 'Error al actualizar el usuario.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al actualizar usuario: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al actualizar usuario: ' . $e->getMessage()];
+    }
+}
+
+// Función para actualizar la información de un organizador
+function updateOrganizer($id, $name, $email)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("UPDATE org SET name = ?, email = ? WHERE id = ?");
+        $result = $stmt->execute([$name, $email, $id]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Organización actualizada exitosamente.'];
+        } else {
+            return ['success' => false, 'message' => 'Error al actualizar la organización.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al actualizar organizador: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al actualizar organización: ' . $e->getMessage()];
+    }
+}
+
+// Opcional: Funciones para eliminación lógica (cambiar estado 'active' a 'inactive' o similar)
+// Si tu tabla users/org tiene una columna 'status' (ej. 'active', 'inactive', 'deleted')
+function deleteUserSoft($userId)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("UPDATE users SET status = 'inactive' WHERE id = ?"); // Asume columna 'status'
+        $result = $stmt->execute([$userId]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Usuario marcado como inactivo.'];
+        } else {
+            return ['success' => false, 'message' => 'Error al inactivar usuario.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al inactivar usuario: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al inactivar usuario.'];
+    }
+}
+
+function deleteOrganizerSoft($orgId)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("UPDATE org SET status = 'inactive' WHERE id = ?"); // Asume columna 'status'
+        $result = $stmt->execute([$orgId]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Organización marcada como inactiva.'];
+        } else {
+            return ['success' => false, 'message' => 'Error al inactivar organización.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al inactivar organización: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al inactivar organización.'];
+    }
+}
+
+// Función para eliminar un usuario de forma permanente (usar con EXTREMA PRECAUCIÓN)
+function deleteUserPermanent($userId)
+{
+    try {
+        $pdo = getDBConnection();
+        // Considera eliminar tickets asociados u otras dependencias para evitar errores de FK
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $pdo->commit();
+        return ['success' => true, 'message' => 'Usuario eliminado permanentemente.'];
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log("Error al eliminar usuario permanentemente: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al eliminar usuario.'];
+    }
+}
+
+// Función para eliminar un organizador de forma permanente (usar con EXTREMA PRECAUCIÓN)
+function deleteOrganizerPermanent($orgId)
+{
+    try {
+        $pdo = getDBConnection();
+        // Considera eliminar eventos asociados u otras dependencias para evitar errores de FK
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("DELETE FROM org WHERE id = ?");
+        $stmt->execute([$orgId]);
+        $pdo->commit();
+        return ['success' => true, 'message' => 'Organización eliminada permanentemente.'];
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log("Error al eliminar organización permanentemente: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al eliminar organización.'];
     }
 }
 

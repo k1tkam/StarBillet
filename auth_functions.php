@@ -66,6 +66,49 @@ function registerOrg($email, $name, $password)
     }
 }
 
+function getTicketsByUserId($user_id)
+{
+    try {
+        $pdo = getDBConnection();
+        $stmt = $pdo->prepare("
+            SELECT 
+                t.*, 
+                e.name AS event_name, 
+                e.date, 
+                e.time, 
+                e.venue, 
+                e.city, 
+                e.image_url
+            FROM tickets t
+            INNER JOIN events e ON t.event_id = e.id
+            WHERE t.user_id = :user_id
+            ORDER BY t.purchase_date DESC
+        ");
+        $stmt->execute([':user_id' => $user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al obtener tickets por usuario: " . $e->getMessage());
+        return [];
+    }
+}
+
+function changeUserPassword($user_id, $new_password) {
+    try {
+        $pdo = getDBConnection();
+        $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $result = $stmt->execute([$hashed, $user_id]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Contraseña actualizada correctamente.'];
+        } else {
+            return ['success' => false, 'message' => 'No se pudo actualizar la contraseña.'];
+        }
+    } catch (PDOException $e) {
+        error_log("Error al cambiar contraseña: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error de base de datos al cambiar contraseña.'];
+    }
+}
+
 // Función para iniciar sesion de usuario
 function loginUser($email, $password)
 {

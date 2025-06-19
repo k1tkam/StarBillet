@@ -109,72 +109,48 @@ unset($_SESSION['error']);
             transition: transform 0.2s;
             cursor: pointer;
         }
-
         .event-card:hover {
             transform: translateY(-5px);
         }
-
         .event-card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             border-bottom: 1px solid #eee;
         }
-
         .event-card-content {
             padding: 15px;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
-
         .event-card-content h3 {
             margin-top: 0;
             color: var(--color-primary);
             font-size: 1.3rem;
             margin-bottom: 10px;
         }
-
         .event-card-content p {
             font-size: 0.9rem;
             color: var(--color-text-muted);
             margin-bottom: 5px;
         }
-
         .event-card-content .price {
             font-weight: 700;
             color: var(--color-accent);
             font-size: 1.1rem;
             margin-top: auto;
-            /* Empuja el precio al final */
         }
-
         .events-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
         }
-
-        .message,
-        .error {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .message {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
         }
     </style>
 </head>
@@ -202,6 +178,9 @@ unset($_SESSION['error']);
                     <a href="contacto.php" role="menuitem" tabindex="0">Contáctanos</a>
                 <?php endif; ?>
                 <?php if ($is_logged_in): ?>
+                    <a href="myTickets.php" role="menuitem" tabindex="0">Mis tickets</a>
+                <?php endif; ?>   
+                <?php if ($is_logged_in): ?>
                     <?php if ($user_role === 'admin'): ?>
                         <a href="admin.php" role="menuitem" tabindex="0">Panel Admin</a>
                     <?php endif; ?>
@@ -209,7 +188,7 @@ unset($_SESSION['error']);
                         <a href="organizer_dashboard.php" role="menuitem" tabindex="0">Mis Eventos</a>
                     <?php endif; ?>
                     <a href="logout.php" role="menuitem" tabindex="0">Cerrar sesión</a>
-                <?php else: ?>
+                <?php else: ?>             
                     <a href="login.php" role="menuitem" tabindex="0">Iniciar sesión</a>
                     <a href="register.php" class="btn-secondary" role="menuitem" tabindex="0">Registrarse</a>
                 <?php endif; ?>
@@ -239,7 +218,9 @@ unset($_SESSION['error']);
                     <h1>Tu Pasaporte a Eventos Inolvidables</h1>
                     <p>Descubre y reserva entradas para conciertos, festivales, deportes y más. Vive la experiencia
                         StarBillet.</p>
-                    <a href="#events" class="btn-primary">Explorar Eventos</a>
+                    <a href="events.php " class="btn-primary">Explorar Eventos</a>
+                    <br>
+                    <a href="changePassword.php" class="btn-primary">Cambiar contraseña</a>
                 </div>
                 <div class="hero-video">
                     <video autoplay muted loop playsinline preload="auto" poster="poster.jpg">

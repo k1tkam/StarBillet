@@ -249,6 +249,7 @@ $org_email = htmlspecialchars($_SESSION['org_email']);
             color: black;
             transform: scale(1.05);
         }
+<<<<<<< HEAD
 
         .page-title {
             text-align: center;
@@ -259,6 +260,8 @@ $org_email = htmlspecialchars($_SESSION['org_email']);
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+=======
+>>>>>>> 9bb875744ab856626d59d94827162d4ada9323aa
     </style>
 
     <script>
@@ -276,6 +279,7 @@ $org_email = htmlspecialchars($_SESSION['org_email']);
     </script>
 
     <main>
+ 
         <h1 class="page-title">NUEVO EVENTO</h1>
         <div class="event-layout">
             <form class="event-form" method="POST" action="">

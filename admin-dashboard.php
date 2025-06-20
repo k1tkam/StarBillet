@@ -157,7 +157,7 @@ unset($_SESSION['error']);
                     </svg>
                     <h3>Reportes y Estadisticas</h3>
                     <p>Visualiza el rendimiento de la plataforma.</p>
-                    <a href="#" class="btn-secondary">Ver Reportes</a>
+                    <a href="stats.php" class="btn-secondary">Ver Reportes</a>
                 </div>
             </div>
         </section>

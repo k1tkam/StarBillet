@@ -5,6 +5,13 @@ session_start();
 require_once 'auth_functions.php';
 require_once 'database.php';
 
+$event_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($event_id <= 0) {
+    header("Location: events.php");
+    exit();
+}
+
 // --- Gestión de Sesión de Usuario ---
 $is_logged_in = false;
 $user_name = '';
@@ -13,11 +20,20 @@ $user_role = '';
 if (isset($_SESSION['user_id'])) {
     $is_logged_in = true;
     $user_name = htmlspecialchars($_SESSION['user_name'] ?? '');
-    $user_role = htmlspecialchars($_SESSION['user_role'] ?? 'user');
+    $user_role = htmlspecialchars($_SESSION['user_role'] ?? 'user');  
+
 } elseif (isset($_SESSION['org_id'])) {
     $is_logged_in = true;
     $user_name = htmlspecialchars($_SESSION['org_name'] ?? '');
     $user_role = 'organizer';
+}
+
+$user_tickets = [];
+if ($is_logged_in && isset($_SESSION['user_id'])) {
+    $pdo = getDBConnection();
+    $stmt = $pdo->prepare("SELECT * FROM tickets WHERE user_id = ? AND event_id = ? AND status = 'active' ORDER BY purchase_date DESC");
+    $stmt->execute([$_SESSION['user_id'], $event_id]);
+    $user_tickets = $stmt->fetchAll();
 }
 
 $user_first_name = '';
@@ -249,6 +265,15 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
             padding: 5px 0;
             font-size: 0.9rem;
         }
+
+        .tustickets{
+            font-size: 1rem;
+            color: #333;
+            margin-top: 40px;
+            margin-bottom: 5px;
+            font-family: 'Moderniz';
+        }
+
     </style>
 </head>
 
@@ -366,9 +391,19 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
                     <?php if (!empty($purchase_result['ticket_code'])): ?>
                         <br><strong>Código de ticket:</strong> <?= htmlspecialchars($purchase_result['ticket_code']) ?>
                     <?php endif; ?>
+
+                    <?php
+                    // Verifica si el usuario tiene ticket para este evento
+                    $pdo = getDBConnection();
+                    $stmt = $pdo->prepare("SELECT * FROM tickets WHERE user_id = ? AND event_id = ? AND status = 'active' ORDER BY purchase_date DESC");
+                    $stmt->execute([$_SESSION['user_id'], $event_id]);
+                    $user_ticket = $stmt->fetch();
+                    ?>                          
                 </div>
             <?php endif; ?>
-        <?php else: ?>
+            
+        <?php else: ?>                 
+
     <div class="info-note">
         StarBillet protege contra la reventa ilegal. Tus entradas están seguras con nosotros.
     </div>
@@ -419,6 +454,21 @@ $tickets_available = $event['available_tickets'] > 0 ? $event['available_tickets
         </div>
         </div>
     </div>
+
+    <?php if ($is_logged_in && !empty($user_tickets)): ?>
+        <div style="margin-top:15px;">
+            <h3 class="tustickets">Tus tickets para este evento:</h3>
+            <?php foreach ($user_tickets as $ticket): ?>
+                <form action="ticket_pdf.php" method="get" target="_blank" style="display:inline-block; margin:5px;">
+                    <input type="hidden" name="event_id" value="<?= $event_id ?>">
+                    <input type="hidden" name="ticket_code" value="<?= htmlspecialchars($ticket['ticket_code']) ?>">
+                    <button type="submit" class="btn-buy" style="background-color:#007bff; color:#fff;">
+                        Descargar Ticket (<?= htmlspecialchars($ticket['ticket_code']) ?>)
+                    </button>
+                </form>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 
     <?php
     $random_events = getRandomEvents(4, $event_id); // trae 5 eventos aleatorios para mostrar
